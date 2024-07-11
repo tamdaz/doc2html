@@ -5,6 +5,7 @@ namespace Tamdaz\Doc2web;
 use Exception;
 use HaydenPierce\ClassFinder\ClassFinder;
 use ReflectionClass;
+use function Laravel\Prompts\text;
 
 class ClassReflector
 {
@@ -27,6 +28,14 @@ class ClassReflector
      */
     public function run(): void
     {
+//        $path = text(
+//            label: "Where do you want to save your documentation?",
+//            placeholder: "ex.: /path/to/folder/",
+//            hint: "You can also use the relative path."
+//        );
+
+        $path = __DIR__ . "/../output/";
+
         ClassFinder::disablePSR4Vendors();
         $classesInNamespace = ClassFinder::getClassesInNamespace($this->targetNamespace);
 
@@ -34,7 +43,7 @@ class ClassReflector
             $this->classes[] = (new ReflectionClass($classInNamespace));
 
         foreach ($this->getClasses() as $class)
-            (new DocumentRenderer($class))->render();
+            (new DocumentRenderer($class, $path))->render();
     }
 
     /**

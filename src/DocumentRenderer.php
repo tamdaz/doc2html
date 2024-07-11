@@ -5,114 +5,151 @@ namespace Tamdaz\Doc2web;
 use Barryvdh\Reflection\DocBlock;
 use DOMDocument;
 use DOMException;
+use Exception;
+use HaydenPierce\ClassFinder\ClassFinder;
 use ReflectionClass;
-use ReflectionMethod;
 
 class DocumentRenderer
 {
-    public function __construct(
-        private ReflectionClass $class
-    ) {}
+    /**
+     * @var DOMDocument
+     */
+    private DOMDocument $dom;
 
     /**
-     * Generate a list of properties and methods present in a class.
+     * @param ReflectionClass $class
+     * @param string $path
+     */
+    public function __construct(
+        private ReflectionClass $class,
+        private string $path
+    ) {
+        $this->dom = new DOMDocument("1.0");
+    }
+
+    /**
+     * Allows to generate a list of properties and methods in a class.
      *
      * @throws DOMException
      */
-    private function generateList(DOMDocument $dom): void
+    private function generateListOfPropertiesAndMethods(): void
     {
-        // List of props.
-        $ul = $dom->createElement("ul");
-        $ul = $dom->appendChild($ul);
+        $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
+
+        $span = $this->dom->createElement("h2", "Props and methods");
+        $asideRight->appendChild($span);
+
+        // All properties.
+        $ul = $this->dom->createElement("ul");
 
         foreach ($this->class->getProperties() as $property) {
-            $a = $dom->createElement("a", $property->getName());
-            $a->setAttribute("href", "#doc2web_properties_" . $property->getName());
+            $li = $this->dom->createElement("li");
+            $a = $this->dom->createElement("a", $property->getName());
+            $a->setAttribute("href", "#doc2web_property_" . $property->getName());
 
-            $li = $dom->createElement("li");
             $li->appendChild($a);
-
             $ul->appendChild($li);
         }
 
-        // List of methods.
-        $ul = $dom->createElement("ul");
-        $ul = $dom->appendChild($ul);
+        $asideRight->appendChild($ul);
+
+        // All methods.
+        $ul = $this->dom->createElement("ul");
 
         foreach ($this->class->getMethods() as $method) {
-            $a = $dom->createElement("a", $method->getName());
+            $li = $this->dom->createElement("li");
+            $a = $this->dom->createElement("a", $method->getName());
             $a->setAttribute("href", "#doc2web_method_" . $method->getName());
 
-            $li = $dom->createElement("li");
             $li->appendChild($a);
-
             $ul->appendChild($li);
         }
+
+        $asideRight->appendChild($ul);
     }
 
     /**
+     * Allows to display all classes in specific classes.
+     * @throws DOMException
+     * @throws Exception
+     */
+    private function generateListOfClasses(): void
+    {
+        global $selectedNamespace;
+
+        $asideLeft = $this->dom->getElementById("asideNamespacesAndClasses");
+
+        $h2 = $this->dom->createElement("h2", "Classes");
+        $asideLeft->appendChild($h2);
+
+        // All classes in specified namespace.
+        $ul = $this->dom->createElement("ul");
+
+        $classesInNamespace = ClassFinder::getClassesInNamespace($selectedNamespace);
+
+        foreach ($classesInNamespace as $class) {
+            $li = $this->dom->createElement("li");
+            $a = $this->dom->createElement("a", $class);
+            $a->setAttribute("href", last(explode("\\", $class)) . ".html");
+
+            $li->appendChild($a);
+            $ul->appendChild($li);
+        }
+
+        $asideLeft->appendChild($ul);
+    }
+
+    /**
+     * Allows to display all information for each method in a specific class.
+     *
      * @throws DOMException
      */
-    private function displayMethod(DOMDocument $dom, ReflectionMethod $method): void
+    private function generateDocMethods(): void
     {
-        $docBlock = new DocBlock($method);
+        $main = $this->dom->getElementById("mainBlock");
 
-        $div = $dom->createElement("div");
+        foreach ($this->class->getMethods() as $method) {
+            $docBlock = new DocBlock($method);
 
-        if ($docBlock->hasTag("deprecated"))
-            $div->setAttribute("style", "color: red");
+            $div = $this->dom->createElement("div");
+            $div->setAttribute("id", "doc2web_method_" . $method->getName());
+            $h2 = $this->dom->createElement("h1", "{$method->getName()}() -> {$method->getReturnType()}");
+            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace;");
 
-        $div = $dom->appendChild($div);
+            $p = $this->dom->createElement("p", $docBlock->getShortDescription());
 
-        $h2 = $dom->createElement("h2", "{$method->getName()}(): {$method->getReturnType()}");
-        $h2->setAttribute("id", "doc2web_method_" . $method->getName());
-        $h2->setAttribute("style", "font-family: monospace");
+            $div->appendChild($h2);
+            $div->appendChild($p);
 
-        $div->appendChild($h2);
-
-        $i = $dom->createElement("p", $docBlock->getShortDescription());
-        $div->appendChild($i);
-
-        if ($docBlock->hasTag("deprecated")) {
-            $deprecationMessage = $docBlock->getTagsByName("deprecated")[0]->getDescription();
-
-            $i = $dom->createElement("b", "Deprecation warning: $deprecationMessage");
-            $div->appendChild($i);
+            $main->appendChild($div);
         }
     }
 
     /**
-     * Render documentations as HTML file.
+     * Render all documentation in specified classes as HTML files.
      *
      * @throws DOMException
      */
     public function render(): void
     {
-        $dom = new DOMDocument('1.0');
-        $dom->formatOutput = true;
+        // To avoid that "DOMDocument" class triggers a warning because of HTML5 tags,
+        // an arobase (@) is specified during HTML file is loading.
+        @$this->dom->loadHTMLFile(__DIR__ . '/../templates/empty-doc.html');
 
-        $style = $dom->createElement("style", "body { max-width: 632px; margin: 0 auto; padding: 32px }");
-        $dom->appendChild($style);
+        $this->generateListOfClasses();
+        $this->generateDocMethods();
+        $this->generateListOfPropertiesAndMethods();
 
-        // Namespace location
-        $pre = $dom->createElement("pre", $this->class->getName());
-        $dom->appendChild($pre);
+        $this->dom->saveHTMLFile($this->getPath() . $this->class->getShortName() . ".html");
+    }
 
-        // Class name.
-        $h1 = $dom->createElement("h1", $this->class->getShortName());
-        $dom->appendChild($h1);
-
-        // List of props & methods.
-        $this->generateList($dom);
-
-        $hr = $dom->createElement("hr");
-        $dom->appendChild($hr);
-
-        // Methods.
-        foreach ($this->class->getMethods() as $method) {
-            $this->displayMethod($dom, $method);
-        }
-
-        $dom->saveHTMLFile(__DIR__ . "/../output/{$this->class->getShortName()}.html");
+    /**
+     * Get the path where HTML docs are saved.
+     *
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
     }
 }
