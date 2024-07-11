@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Doc2HTML</title>
+
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Sans+Mono:ital,wght@0,400..700;1,400..700&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap');
+
+            body {
+                margin: 0;
+                font-family: "Ubuntu Sans", sans-serif;
+            }
+
+            pre, code {
+                font-family: "Ubuntu Sans Mono", sans-serif;
+            }
+
+            .view {
+                display: flex;
+                flex-direction: row;
+            }
+
+            aside {
+                flex-grow: 1;
+                padding: 16px 64px 16px 32px;
+            }
+
+            aside:first-child {
+                display: flex;
+                flex-direction: column;
+                align-items: end;
+            }
+
+            .container {
+                width: 800px;
+                padding: 16px;
+                border-left: 1px solid black;
+                border-right: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="view">
+            <aside id="asideNamespacesAndClasses">
+                <!-- List of namespaces / classes -->
+                <h2>Classes</h2>
+                <ul>
+                    <li>ClassOne</li>
+                    <li>ClassTwo</li>
+                    <li>ClassThree</li>
+                    <li>ClassFour</li>
+                </ul>
+            </aside>
+            <main class="container">
+                <!-- Details about selected class -->
+                <h1>ClassOne</h1>
+                <p>Comment from the class</p>
+                <hr />
+                <div>
+                    <h2 style="font-family: 'Ubuntu Sans Mono', monospace">newMethod(): string</h2>
+                    <p>New method that displays "New method".</p>
+                </div>
+            </main>
+            <aside id="asidePropertiesAndMethods">
+                <h2>Properties</h2>
+                <ul>
+                    <li>PropOne</li>
+                    <li>PropTwo</li>
+                    <li>PropThree</li>
+                    <li>PropFour</li>
+                </ul>
+
+                <h2>Methods</h2>
+                <ul>
+                    <li>PropOne</li>
+                    <li>PropTwo</li>
+                    <li>PropThree</li>
+                    <li>PropFour</li>
+                </ul>
+            </aside>
+        </div>
+    </body>
+</html>

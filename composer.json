@@ -1,0 +1,28 @@
+{
+    "name": "tamdaz/doc2web",
+    "description": "A tool that enables to convert PHP docs in web.",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tamdaz\\Doc2web\\": "src/",
+            "Examples\\": "examples/"
+        }
+    },
+    "authors": [
+        {
+            "name": "tamdaz",
+            "email": "tamda.zohir.pro@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-dom": "*",
+        "laravel/prompts": "^0.1.24",
+        "haydenpierce/class-finder": "^0.5.3",
+        "barryvdh/reflection-docblock": "^2.1"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^7.1",
+        "phpunit/phpunit": "^11.2"
+    }
+}
