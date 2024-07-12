@@ -2,11 +2,11 @@
 
 namespace Tamdaz\Doc2Html;
 
-use Barryvdh\Reflection\DocBlock;
+use Exception;
 use DOMDocument;
 use DOMException;
-use Exception;
 use ReflectionClass;
+use Barryvdh\Reflection\DocBlock;
 
 /**
  * Class that allows to convert PHP documentations in HTML file.
