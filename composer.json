@@ -1,11 +1,11 @@
 {
-    "name": "tamdaz/doc2web",
+    "name": "tamdaz/doc2html",
     "description": "A tool that enables to convert PHP docs in web.",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Tamdaz\\Doc2web\\": "src/",
+            "Tamdaz\\Doc2Html\\": "src/",
             "Examples\\": "examples/"
         }
     },

@@ -2,6 +2,9 @@
 
 namespace Examples;
 
+/**
+ * Class that contains one of two deprecated methods.
+ */
 class DeprecationExample
 {
     /**
