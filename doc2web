@@ -6,9 +6,7 @@ use Tamdaz\Doc2web\ClassReflector;
 
 require_once "vendor/autoload.php";
 
-try {
-    $reflector = new ClassReflector("Examples");
-    $reflector->run();
-} catch (Exception $e) {
-    echo $e->getMessage();
-}
+$selectedNamespace = "Examples";
+
+$reflector = new ClassReflector($selectedNamespace);
+$reflector->run();
