@@ -1,15 +1,17 @@
 <?php
 
-namespace Tamdaz\Doc2web;
+namespace Tamdaz\Doc2Html;
 
 use Barryvdh\Reflection\DocBlock;
 use DOMDocument;
 use DOMException;
 use Exception;
-use HaydenPierce\ClassFinder\ClassFinder;
 use ReflectionClass;
 
-class DocumentRenderer
+/**
+ * Class that allows to convert PHP documentations in HTML file.
+ */
+class DocumentationRenderer
 {
     /**
      * @var DOMDocument
@@ -40,9 +42,9 @@ class DocumentRenderer
         // an arobase (@) is specified during HTML file is loading.
         @$this->dom->loadHTMLFile(__DIR__ . '/../templates/empty-doc.html');
 
-        $this->generateListOfClasses();
-        $this->generateDocMethods();
-        $this->generateListOfPropertiesAndMethods();
+        $this->renderListOfClasses();
+        $this->renderDocumentationFromMethods();
+        $this->renderListOfPropertiesAndMethods();
 
         $this->dom->saveHTMLFile($outputPath);
     }
@@ -54,7 +56,10 @@ class DocumentRenderer
      */
     public function getPath(): string
     {
-        return $this->path;
+        if (str_ends_with($this->path, "/"))
+            return $this->path;
+
+        return $this->path . '/';
     }
 
     /**
@@ -62,10 +67,8 @@ class DocumentRenderer
      * @throws DOMException
      * @throws Exception
      */
-    private function generateListOfClasses(): void
+    private function renderListOfClasses(): void
     {
-        global $selectedNamespace;
-
         $asideLeft = $this->dom->getElementById("asideNamespacesAndClasses");
 
         $h2 = $this->dom->createElement("h2", "Classes");
@@ -74,13 +77,11 @@ class DocumentRenderer
         // All classes in specified namespace.
         $ul = $this->dom->createElement("ul");
 
-        $classesInNamespace = ClassFinder::getClassesInNamespace($selectedNamespace);
-
-        foreach ($classesInNamespace as $class) {
-            $className = last(explode("\\", $class));
+        foreach (ObjectRegister::getInstance()->getClasses() as $class) {
+            $className = $class->getShortName();
 
             $li = $this->dom->createElement("li");
-            $a = $this->dom->createElement("a", $class);
+            $a = $this->dom->createElement("a", $className);
             $a->setAttribute("href", $className . ".html");
 
             $li->appendChild($a);
@@ -91,29 +92,54 @@ class DocumentRenderer
     }
 
     /**
-     * Allows to display all information for each method in a specific class.
+     * Allows to display a documentation for each method in a specific class.
      *
      * @throws DOMException
      */
-    private function generateDocMethods(): void
+    private function renderDocumentationFromMethods(): void
     {
         $main = $this->dom->getElementById("mainBlock");
+
+        $title = $this->dom->createElement("h1", $this->class->getShortName());
+        $title->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace");
+
+        $main->appendChild($title);
+
+        $p = $this->dom->createElement("p", (new DocBlock($this->class))->getShortDescription());
+
+        $main->appendChild($p);
 
         foreach ($this->class->getMethods() as $method) {
             $docBlock = new DocBlock($method);
 
             $methodName = $method->getName();
             $returnType = $method->getReturnType();
-            $divId = "doc2web_method_" . $methodName;
 
+            $divId = "doc2web_method_" . $methodName;
             $div = $this->dom->createElement("div");
             $div->setAttribute("id", $divId);
-            $h2 = $this->dom->createElement("h1", "$methodName() -> $returnType");
+
+            if (!empty($returnType)) {
+                $h2 = $this->dom->createElement("h1", "$methodName() -> $returnType");
+            } else {
+                $h2 = $this->dom->createElement("h1", "$methodName()");
+            }
+
             $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace;");
 
             $p = $this->dom->createElement("p", $docBlock->getShortDescription());
 
-            $div->append($h2, $p);
+            if ($docBlock->hasTag("deprecated")) {
+                $deprecationMessage = $docBlock->getTagsByName("deprecated")[0]->getDescription();
+
+                $div->setAttribute("style", "background-color: yellow");
+                $b = $this->dom->createElement("b", "DEPRECATION WARNING : $deprecationMessage");
+
+                $div->append($h2, $p, $b);
+            } else {
+                $div->append($h2, $p);
+            }
+
             $main->appendChild($div);
         }
     }
@@ -123,7 +149,7 @@ class DocumentRenderer
      *
      * @throws DOMException
      */
-    private function generateListOfPropertiesAndMethods(): void
+    private function renderListOfPropertiesAndMethods(): void
     {
         $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
 
