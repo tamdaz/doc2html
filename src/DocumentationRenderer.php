@@ -44,7 +44,8 @@ class DocumentationRenderer
 
         $this->renderListOfClasses();
         $this->renderDocumentationFromMethods();
-        $this->renderListOfPropertiesAndMethods();
+        $this->renderListOfProperties();
+        $this->renderListOfMethods();
 
         $this->dom->saveHTMLFile($outputPath);
     }
@@ -116,6 +117,7 @@ class DocumentationRenderer
             $returnType = $method->getReturnType();
 
             $divId = "doc2web_method_" . $methodName;
+
             $div = $this->dom->createElement("div");
             $div->setAttribute("id", $divId);
 
@@ -145,18 +147,15 @@ class DocumentationRenderer
     }
 
     /**
-     * Allows to generate a list of properties and methods in a class.
-     *
      * @throws DOMException
      */
-    private function renderListOfPropertiesAndMethods(): void
+    private function renderListOfProperties(): void
     {
         $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
 
-        $span = $this->dom->createElement("h2", "Props and methods");
+        $span = $this->dom->createElement("h2", "Properties");
         $asideRight->appendChild($span);
 
-        // All properties.
         $ul = $this->dom->createElement("ul");
 
         foreach ($this->class->getProperties() as $property) {
@@ -169,8 +168,18 @@ class DocumentationRenderer
         }
 
         $asideRight->appendChild($ul);
+    }
 
-        // All methods.
+    /**
+     * @throws DOMException
+     */
+    private function renderListOfMethods(): void
+    {
+        $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
+
+        $span = $this->dom->createElement("h2", "Methods");
+        $asideRight->appendChild($span);
+
         $ul = $this->dom->createElement("ul");
 
         foreach ($this->class->getMethods() as $method) {

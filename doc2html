@@ -2,15 +2,16 @@
 
 <?php
 
-use Tamdaz\Doc2Html\ClassReflector;
-use Tamdaz\Doc2Html\ObjectRegister;
+use Tamdaz\Doc2Html\{ClassReflector, Config, ObjectRegister};
 
 require_once "vendor/autoload.php";
 
 $objectRegister = ObjectRegister::getInstance();
 
-$objectRegister->registerNamespace("Examples");
-$objectRegister->registerNamespace("Tamdaz\Doc2Html");
+$namespaces = Config::getTargetNamespaces();
+
+foreach ($namespaces as $namespace)
+    $objectRegister->registerNamespace($namespace);
 
 $reflector = new ClassReflector();
 

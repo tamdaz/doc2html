@@ -3,9 +3,14 @@
 namespace Tamdaz\Doc2Html;
 
 use Exception;
-use HaydenPierce\ClassFinder\ClassFinder;
 use ReflectionClass;
+use HaydenPierce\ClassFinder\ClassFinder;
 
+/**
+ * Class that store namespaces and classes for generate documentations.
+ *
+ * @
+ */
 class ObjectRegister
 {
     /**
@@ -68,6 +73,11 @@ class ObjectRegister
         }
     }
 
+    /**
+     * Get all registered namespaces.
+     *
+     * @return array<string>
+     */
     public function getNamespaces(): array
     {
         return $this->namespaces;
@@ -76,7 +86,7 @@ class ObjectRegister
     /**
      * Get all found classes.
      *
-     * @return ReflectionClass[]
+     * @return array<ReflectionClass>
      */
     public function getClasses(): array
     {

@@ -16,12 +16,23 @@ class ClassReflector
         $objectRegister = ObjectRegister::getInstance();
         $objectRegister->findClasses();
 
-        if (empty($objectRegister->getNamespaces()))
-            die("There's no registered namespaces, end of program.");
+        if (empty($objectRegister->getNamespaces())) {
+            echo "There's no registered namespaces, end of program.\n";
+            exit(1);
+        }
 
-        $path = __DIR__ . "/../output/";
+        $path = Config::getOutputDir();
 
-        foreach ($objectRegister->getClasses() as $class)
+        foreach ($objectRegister->getClasses() as $class) {
+            if (Config::isVerbose())
+                echo "[ \e[33m>>\e[39m ] Generating documentation for {$class->getShortName()} class...\r";
+
             (new DocumentationRenderer($class, $path))->render();
+
+            if (Config::isVerbose())
+                echo "[ \e[32mOK\e[39m ] Generating documentation for {$class->getShortName()} class...\n";
+        }
+
+        echo "[ \e[32mOK\e[39m ] Documentation successfully generated !\n";
     }
 }
