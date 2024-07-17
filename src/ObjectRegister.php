@@ -8,8 +8,6 @@ use HaydenPierce\ClassFinder\ClassFinder;
 
 /**
  * Class that store namespaces and classes for generate documentations.
- *
- * @
  */
 class ObjectRegister
 {
@@ -65,10 +63,14 @@ class ObjectRegister
         ClassFinder::disablePSR4Vendors();
 
         foreach ($this->getNamespaces() as $namespace) {
+            LoggerOutput::info("Found classes in $namespace\n");
+
             $classes = ClassFinder::getClassesInNamespace($namespace);
 
             foreach ($classes as $class) {
                 $this->addClass(new ReflectionClass($class));
+
+                LoggerOutput::success("Registered $class class\n");
             }
         }
     }

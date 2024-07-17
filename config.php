@@ -9,7 +9,6 @@ return [
 
     // Selected namespaces to generate documentations.
     'target_namespaces' => [
-        'Examples',
-        'Tamdaz\Doc2Html'
+        'Examples'
     ]
 ];

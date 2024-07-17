@@ -25,12 +25,12 @@ class ClassReflector
 
         foreach ($objectRegister->getClasses() as $class) {
             if (Config::isVerbose())
-                echo "[ \e[33m>>\e[39m ] Generating documentation for {$class->getShortName()} class...\r";
+                LoggerOutput::progress("Generating documentation for {$class->getShortName()} class...\r");
 
             (new DocumentationRenderer($class, $path))->render();
 
             if (Config::isVerbose())
-                echo "[ \e[32mOK\e[39m ] Generating documentation for {$class->getShortName()} class...\n";
+                LoggerOutput::success("Generating documentation for {$class->getShortName()} class...\n");
         }
 
         echo "[ \e[32mOK\e[39m ] Documentation successfully generated !\n";

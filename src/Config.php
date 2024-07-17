@@ -5,7 +5,7 @@ namespace Tamdaz\Doc2Html;
 class Config
 {
     /**
-     * TODO: This config path is stored as property to not change it.
+     * INFO: This config path is stored as property to keep it absolute.
      *
      * @var string
      */

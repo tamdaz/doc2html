@@ -2,9 +2,40 @@
 
 <?php
 
-use Tamdaz\Doc2Html\{ClassReflector, Config, ObjectRegister};
+use Phalcon\Cop\Parser;
+use Tamdaz\Doc2Html\{ClassReflector, Config, LoggerOutput, ObjectRegister};
 
 require_once "vendor/autoload.php";
+
+$parser = new Parser($argv);
+
+$args = $parser->parse();
+
+if (in_array("--compile", $args)) {
+    LoggerOutput::info("Compiling doc2html.phar file...\r");
+
+    sleep(1);
+
+    if (file_exists('doc2html.phar'))
+        unlink('doc2html.phar');
+
+    $phar = new Phar('doc2html.phar');
+
+    $phar->buildFromDirectory(__DIR__ . '/src');
+    $phar->buildFromDirectory(__DIR__ . '/examples');
+    $phar->buildFromDirectory(__DIR__ . '/templates');
+    $phar->buildFromDirectory(__DIR__ . '/vendor');
+
+    $phar->setDefaultStub("doc2html.php", "/doc2html.php");
+
+    $phar->compressFiles(Phar::GZ);
+
+    chmod(__DIR__ . '/doc2html.phar', 0770);
+
+    LoggerOutput::success("Successfully compiled doc2html.phar file.\n");
+
+    exit(0);
+}
 
 $objectRegister = ObjectRegister::getInstance();
 
@@ -14,5 +45,4 @@ foreach ($namespaces as $namespace)
     $objectRegister->registerNamespace($namespace);
 
 $reflector = new ClassReflector();
-
 $reflector->run();

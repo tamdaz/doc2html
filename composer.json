@@ -19,7 +19,8 @@
         "ext-dom": "*",
         "laravel/prompts": "^0.1.24",
         "haydenpierce/class-finder": "^0.5.3",
-        "barryvdh/reflection-docblock": "^2.1"
+        "barryvdh/reflection-docblock": "^2.1",
+        "phalcon/cli-options-parser": "^2.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^7.1",

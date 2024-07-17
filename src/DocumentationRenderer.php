@@ -5,7 +5,9 @@ namespace Tamdaz\Doc2Html;
 use Exception;
 use DOMDocument;
 use DOMException;
+use Reflection;
 use ReflectionClass;
+use ReflectionMethod;
 use Barryvdh\Reflection\DocBlock;
 
 /**
@@ -38,7 +40,7 @@ class DocumentationRenderer
     {
         $outputPath = $this->getPath() . $this->class->getShortName() . ".html";
 
-        // To avoid that "DOMDocument" class triggers a warning because of HTML5 tags,
+        // To avoid that "DOMDocument" class triggers a warning because of HTML5 semantic tags,
         // an arobase (@) is specified during HTML file is loading.
         @$this->dom->loadHTMLFile(__DIR__ . '/../templates/empty-doc.html');
 
@@ -51,7 +53,7 @@ class DocumentationRenderer
     }
 
     /**
-     * Get the path where HTML docs are saved.
+     * Get the path where HTML docs will be saved.
      *
      * @return string
      */
@@ -64,7 +66,8 @@ class DocumentationRenderer
     }
 
     /**
-     * Allows to display all classes in specific classes.
+     * Allows to display all classes.
+     *
      * @throws DOMException
      * @throws Exception
      */
@@ -93,7 +96,34 @@ class DocumentationRenderer
     }
 
     /**
-     * Allows to display a documentation for each method in a specific class.
+     * Build the signature of a method.
+     *
+     * @param ReflectionMethod $method
+     * @return string
+     */
+    private function buildSignature(ReflectionMethod $method): string
+    {
+        // Signature
+        $modifiers = Reflection::getModifierNames($method->getModifiers());
+        $signature = join(" ", $modifiers) . " function " . $method->getName() . "(";
+
+        foreach ($method->getParameters() as $key => $parameter) {
+            $signature .= $parameter->getType() . " $" . $parameter->getName();
+
+            if ($key !== array_key_last($method->getParameters()))
+                $signature .= ", ";
+        }
+
+        if ($method->hasReturnType())
+            $signature .= "): " . $method->getReturnType();
+        else
+            $signature .= ")";
+
+        return $signature;
+    }
+
+    /**
+     * Allows to display a documentation for each method.
      *
      * @throws DOMException
      */
@@ -106,8 +136,8 @@ class DocumentationRenderer
 
         $main->appendChild($title);
 
-        $p = $this->dom->createElement("p", (new DocBlock($this->class))->getShortDescription());
-
+        $description = (new DocBlock($this->class))->getShortDescription();
+        $p = $this->dom->createElement("p", $description);
         $main->appendChild($p);
 
         foreach ($this->class->getMethods() as $method) {
@@ -116,19 +146,20 @@ class DocumentationRenderer
             $methodName = $method->getName();
             $returnType = $method->getReturnType();
 
-            $divId = "doc2web_method_" . $methodName;
+            $divId = "doc2html_method_" . $methodName;
 
             $div = $this->dom->createElement("div");
             $div->setAttribute("id", $divId);
 
             if (!empty($returnType)) {
-                $h2 = $this->dom->createElement("h1", "$methodName() -> $returnType");
+                $h2 = $this->dom->createElement("h1", "- $methodName(): $returnType");
             } else {
-                $h2 = $this->dom->createElement("h1", "$methodName()");
+                $h2 = $this->dom->createElement("h1", "- $methodName()");
             }
 
-            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace;");
+            $pre = $this->dom->createElement("pre", $this->buildSignature($method));
 
+            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace;");
             $p = $this->dom->createElement("p", $docBlock->getShortDescription());
 
             if ($docBlock->hasTag("deprecated")) {
@@ -137,9 +168,9 @@ class DocumentationRenderer
                 $div->setAttribute("style", "background-color: yellow");
                 $b = $this->dom->createElement("b", "DEPRECATION WARNING : $deprecationMessage");
 
-                $div->append($h2, $p, $b);
+                $div->append($h2, $pre, $p, $b);
             } else {
-                $div->append($h2, $p);
+                $div->append($h2, $pre, $p);
             }
 
             $main->appendChild($div);
@@ -147,6 +178,8 @@ class DocumentationRenderer
     }
 
     /**
+     * Render a list of properties in specified class.
+     *
      * @throws DOMException
      */
     private function renderListOfProperties(): void
@@ -161,7 +194,7 @@ class DocumentationRenderer
         foreach ($this->class->getProperties() as $property) {
             $li = $this->dom->createElement("li");
             $a = $this->dom->createElement("a", $property->getName());
-            $a->setAttribute("href", "#doc2web_property_" . $property->getName());
+            $a->setAttribute("href", "#doc2html_property_" . $property->getName());
 
             $li->appendChild($a);
             $ul->appendChild($li);
@@ -171,6 +204,8 @@ class DocumentationRenderer
     }
 
     /**
+     * Render a list of methods in specified class.
+     *
      * @throws DOMException
      */
     private function renderListOfMethods(): void
@@ -185,7 +220,7 @@ class DocumentationRenderer
         foreach ($this->class->getMethods() as $method) {
             $li = $this->dom->createElement("li");
             $a = $this->dom->createElement("a", $method->getName());
-            $a->setAttribute("href", "#doc2web_method_" . $method->getName());
+            $a->setAttribute("href", "#doc2html_method_" . $method->getName());
 
             $li->appendChild($a);
             $ul->appendChild($li);
