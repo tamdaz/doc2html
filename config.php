@@ -1,7 +1,7 @@
 <?php
 
 return [
-    // Path where documentations are saved.
+    // Path where the documentation will be saved.
     'output_dir' => __DIR__ . '/output',
 
     // For each action, indicate it to standard output.
