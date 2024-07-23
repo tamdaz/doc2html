@@ -3,11 +3,18 @@
     "description": "A tool that enables to convert PHP docs in HTML files.",
     "type": "project",
     "license": "MIT",
+    "prefer-stable": true,
+    "bin": [
+        "./doc2html"
+    ],
     "autoload": {
         "psr-4": {
             "Tamdaz\\Doc2Html\\": "src/",
             "Examples\\": "examples/"
-        }
+        },
+        "classmap": [
+            "examples/", "src/"
+        ]
     },
     "authors": [
         {
@@ -15,15 +22,23 @@
             "email": "tamda.zohir.pro@gmail.com"
         }
     ],
+    "config": {
+        "platform": {
+            "php": "8.2"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+    },
     "require": {
         "ext-dom": "*",
-        "laravel/prompts": "^0.1.24",
-        "haydenpierce/class-finder": "^0.5.3",
         "barryvdh/reflection-docblock": "^2.1",
         "phalcon/cli-options-parser": "^2.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^7.1",
-        "phpunit/phpunit": "^11.2"
+        "phpunit/phpunit": "^11.2",
+        "phpcompatibility/php-compatibility": "*"
     }
 }
