@@ -3,7 +3,7 @@
 namespace Tamdaz\Doc2Html;
 
 /**
- * Allows to display information in standard output.
+ * Allows to display information to standard output (STDOUT).
  */
 class LoggerOutput
 {
