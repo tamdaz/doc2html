@@ -156,22 +156,23 @@ class DocumentationRenderer
 
             $div = $this->dom->createElement("div");
             $div->setAttribute("id", $divId);
+            $div->setAttribute("style", "border-bottom: 1px solid lightgrey");
 
             if (!empty($returnType)) {
-                $h2 = $this->dom->createElement("h1", "- $methodName(): $returnType");
+                $h2 = $this->dom->createElement("h1", "# $methodName(): $returnType");
             } else {
-                $h2 = $this->dom->createElement("h1", "- $methodName()");
+                $h2 = $this->dom->createElement("h1", "# $methodName()");
             }
 
             $pre = $this->dom->createElement("pre", $this->buildSignature($method));
 
-            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace;");
+            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace");
             $p = $this->dom->createElement("p", $docBlock->getShortDescription());
 
             if ($docBlock->hasTag("deprecated")) {
                 $deprecationMessage = $docBlock->getTagsByName("deprecated")[0]->getDescription();
 
-                $div->setAttribute("style", "background-color: yellow");
+                $div->setAttribute("style", "background-color: yellow; padding: 2px 16px 16px 16px");
                 $b = $this->dom->createElement("b", "DEPRECATION WARNING : $deprecationMessage");
 
                 $div->append($h2, $pre, $p, $b);
