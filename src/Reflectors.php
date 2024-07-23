@@ -24,7 +24,6 @@ class Reflectors
             ->excludeClasses(...Config::excludeClasses())
             ->includeNamespaces(...Config::includeNamespaces())
             ->includeClasses(...Config::includeClasses())
-            ->setIncludeVendor(true)
         ;
 
         if (Config::isVerbose()) {
