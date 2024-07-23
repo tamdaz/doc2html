@@ -2,47 +2,31 @@
 
 <?php
 
+use Tamdaz\Doc2Html\Exceptions\EmptyNamespacesException;
+use Tamdaz\Doc2Html\LoggerOutput;
 use Phalcon\Cop\Parser;
-use Tamdaz\Doc2Html\{ClassReflector, Config, LoggerOutput, ObjectRegister};
+use Tamdaz\Doc2Html\Reflectors;
 
 require_once "vendor/autoload.php";
 
-$parser = new Parser($argv);
-
+$parser = new Parser();
 $args = $parser->parse();
 
-if (in_array("--compile", $args)) {
-    LoggerOutput::info("Compiling doc2html.phar file...\r");
+if ($parser->has("gen-config")) {
+    copy(
+        __DIR__ . '/generators/doc2html.config.php',
+        __DIR__ . '/doc2html.config.php'
+    );
 
-    sleep(1);
-
-    if (file_exists('doc2html.phar'))
-        unlink('doc2html.phar');
-
-    $phar = new Phar('doc2html.phar');
-
-    $phar->buildFromDirectory(__DIR__ . '/src');
-    $phar->buildFromDirectory(__DIR__ . '/examples');
-    $phar->buildFromDirectory(__DIR__ . '/templates');
-    $phar->buildFromDirectory(__DIR__ . '/vendor');
-
-    $phar->setDefaultStub("doc2html.php", "/doc2html.php");
-
-    $phar->compressFiles(Phar::GZ);
-
-    chmod(__DIR__ . '/doc2html.phar', 0770);
-
-    LoggerOutput::success("Successfully compiled doc2html.phar file.\n");
+    LoggerOutput::success("Successfully generated \"doc2html.config.php\" file.\n");
 
     exit(0);
 }
 
-$objectRegister = ObjectRegister::getInstance();
+$reflector = new Reflectors();
 
-$namespaces = Config::getTargetNamespaces();
-
-foreach ($namespaces as $namespace)
-    $objectRegister->registerNamespace($namespace);
-
-$reflector = new ClassReflector();
-$reflector->run();
+try {
+    $reflector->run();
+} catch (EmptyNamespacesException|DOMException|Exception $e) {
+    LoggerOutput::error("[{$e->getCode()}]: {$e->getMessage()}\n");
+}
