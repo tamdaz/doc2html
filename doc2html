@@ -2,10 +2,11 @@
 
 <?php
 
-use Tamdaz\Doc2Html\Exceptions\EmptyNamespacesException;
-use Tamdaz\Doc2Html\LoggerOutput;
 use Phalcon\Cop\Parser;
+use Tamdaz\Doc2Html\Config;
 use Tamdaz\Doc2Html\Reflectors;
+use Tamdaz\Doc2Html\LoggerOutput;
+use Tamdaz\Doc2Html\Exceptions\EmptyClassesException;
 
 require_once "vendor/autoload.php";
 
@@ -15,7 +16,7 @@ $args = $parser->parse();
 if ($parser->has("gen-config")) {
     copy(
         __DIR__ . '/generators/doc2html.config.php',
-        __DIR__ . '/doc2html.config.php'
+        './doc2html.config.php'
     );
 
     LoggerOutput::success("Successfully generated \"doc2html.config.php\" file.\n");
@@ -23,10 +24,14 @@ if ($parser->has("gen-config")) {
     exit(0);
 }
 
+if ($parser->has("dev-mode")) {
+    Config::$isDevMode = true;
+}
+
 $reflector = new Reflectors();
 
 try {
     $reflector->run();
-} catch (EmptyNamespacesException|DOMException|Exception $e) {
+} catch (EmptyClassesException|DOMException|Exception $e) {
     LoggerOutput::error("[{$e->getCode()}]: {$e->getMessage()}\n");
 }

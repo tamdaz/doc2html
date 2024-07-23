@@ -2,9 +2,9 @@
 
 namespace Tamdaz\Doc2Html;
 
-use Tamdaz\Doc2Html\Traits\{Excludable, Includable};
 use ReflectionClass;
 use ReflectionException;
+use Tamdaz\Doc2Html\Traits\{Excludable, Includable};
 
 class Classmap
 {
@@ -44,7 +44,12 @@ class Classmap
      */
     public function generate(): void
     {
-        $autoloadClassmap = require 'vendor/composer/autoload_classmap.php';
+        // Dev mode -> 1 time dot...
+        // Prod mode -> 3 times dot...
+        if (Config::$isDevMode === true)
+            $autoloadClassmap = require __DIR__ . '/../vendor/composer/autoload_classmap.php';
+        else
+            $autoloadClassmap = require __DIR__ . '/../../../composer/autoload_classmap.php';
 
         // Exclude anything in "vendor/" directory.
         if (!$this->isVendorIncluded()) {

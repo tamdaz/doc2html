@@ -5,10 +5,25 @@ namespace Tamdaz\Doc2Html;
 class Config
 {
     /**
+     * Get the config from the project.
+     *
      * @info This config path is stored as property to keep it absolute.
      * @var string
      */
-    private const string CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
+    private const string CONFIG_PATH = __DIR__ . '/../../../../doc2html.config.php';
+
+    /**
+     * Get the config from this library.
+     *
+     * @info This config path is stored as property to keep it absolute (for dev mode only).
+     * @var string
+     */
+    private const string DEV_CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
+
+    /**
+     * @var bool
+     */
+    public static bool $isDevMode = false;
 
     /**
      * Get the output path where documentations will be saved.
@@ -79,6 +94,9 @@ class Config
      */
     private static function getConfig(): object
     {
-        return (object) require self::CONFIG_PATH;
+        if (self::$isDevMode === true)
+            return (object) require self::DEV_CONFIG_PATH;
+        else
+            return (object) require self::CONFIG_PATH;
     }
 }
