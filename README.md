@@ -6,7 +6,9 @@ doc2html is a tool that enables to convert PHP documentation in HTML files.
 > _For the moment, this project is in the development phase. It is not yet completely finished._
 
 ## Installation
-To use doc2html, it must be installed in the user directory.
+```shell
+composer require --dev tamdaz/doc2html
+```
 
 ## Configuration
 
@@ -49,5 +51,25 @@ return [
 ];
 ```
 
-## Contributions
+Before generating the documentation, it is necessary to target the different directories because
+it allows to register your classes in the classmap.
+
+```json
+"autoload": {
+    "classmap": [
+        "examples/", "src/"
+    ]
+},
+```
+
+```shell
+composer dump-autoload
+```
+
+For information, this library uses the classmap of Composer to allow you
+to choose those you do not want to generate documentation.
+
+After that, you can generate it by executing `./vendor/bin/doc2html`.
+
+## Contributors
 Any contributions are welcome.
