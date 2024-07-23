@@ -5,11 +5,10 @@ namespace Tamdaz\Doc2Html;
 class Config
 {
     /**
-     * INFO: This config path is stored as property to keep it absolute.
-     *
+     * @info This config path is stored as property to keep it absolute.
      * @var string
      */
-    private const string CONFIG_PATH = __DIR__ . '/../config.php';
+    private const string CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
 
     /**
      * Get the output path where documentations will be saved.
@@ -24,11 +23,43 @@ class Config
     /**
      * Check if the program can be verbose or not.
      *
-     * @return string
+     * @return bool
      */
-    public static function isVerbose(): string
+    public static function isVerbose(): bool
     {
         return self::getConfig()->verbose;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function includeNamespaces(): array
+    {
+        return self::getConfig()->include_namespaces;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function excludeNamespaces(): array
+    {
+        return self::getConfig()->exclude_namespaces;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function includeClasses(): array
+    {
+        return self::getConfig()->include_classes;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public static function excludeClasses(): array
+    {
+        return self::getConfig()->exclude_classes;
     }
 
     /**
@@ -48,6 +79,6 @@ class Config
      */
     private static function getConfig(): object
     {
-        return (object) include self::CONFIG_PATH;
+        return (object) require self::CONFIG_PATH;
     }
 }
