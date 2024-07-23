@@ -3,9 +3,9 @@
 namespace Tamdaz\Doc2Html;
 
 use Exception;
+use Reflection;
 use DOMDocument;
 use DOMException;
-use Reflection;
 use ReflectionClass;
 use ReflectionMethod;
 use Barryvdh\Reflection\DocBlock;
@@ -78,21 +78,27 @@ class DocumentationRenderer
         $h2 = $this->dom->createElement("h2", "Classes");
         $asideLeft->appendChild($h2);
 
-        // All classes in specified namespace.
-        $ul = $this->dom->createElement("ul");
+        // Group of namespaces.
+        foreach (Classmap::getInstance()->getGroupNamespacesName() as $namespace => $classes) {
+            $div = $this->dom->createElement("div");
 
-        foreach (ObjectRegister::getInstance()->getClasses() as $class) {
-            $className = $class->getShortName();
+            $h3 = $this->dom->createElement("h3", $namespace);
+            $div->appendChild($h3);
 
-            $li = $this->dom->createElement("li");
-            $a = $this->dom->createElement("a", $className);
-            $a->setAttribute("href", $className . ".html");
+            $ul = $this->dom->createElement("ul");
 
-            $li->appendChild($a);
-            $ul->appendChild($li);
+            foreach ($classes as $class) {
+                $li = $this->dom->createElement("li");
+                $a = $this->dom->createElement("a", $class);
+                $a->setAttribute("href", $class . ".html");
+
+                $li->appendChild($a);
+                $ul->appendChild($li);
+            }
+
+            $div->appendChild($ul);
+            $asideLeft->appendChild($div);
         }
-
-        $asideLeft->appendChild($ul);
     }
 
     /**
