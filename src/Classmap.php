@@ -2,6 +2,7 @@
 
 namespace Tamdaz\Doc2Html;
 
+use Composer\InstalledVersions;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -46,12 +47,12 @@ class Classmap
      */
     public function generate(): void
     {
-        // Dev mode -> 1 time dot...
-        // Prod mode -> 3 times dot...
-        if (Config::$isDevMode === true)
-            $autoloadClassmap = require __DIR__ . '/../vendor/composer/autoload_classmap.php';
-        else
-            $autoloadClassmap = require __DIR__ . '/../../../composer/autoload_classmap.php';
+        $path = str_replace(
+            "/../..", "", // always go to "vendor/composer/" dir
+            InstalledVersions::getRootPackage()["install_path"]
+        ) . "autoload_classmap.php";
+
+        $autoloadClassmap = require $path;
 
         // Exclude anything in "vendor/" directory.
         if (!$this->isVendorIncluded()) {
