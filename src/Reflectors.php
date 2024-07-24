@@ -66,7 +66,7 @@ class Reflectors
         LoggerOutput::success("Documentation successfully generated !\n");
 
         // 1 is a second.
-        if ($time >= 1)
-            LoggerOutput::info("Took " . date("i:s", $time) . " sec.\n");
+        if ($time >= 1.0)
+            LoggerOutput::info("Took " . date("i:s", (int) $time) . " sec.\n");
     }
 }

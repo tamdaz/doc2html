@@ -15,7 +15,7 @@ class NonExistentNamespaceException extends Exception
     protected $message = "Can't find namespace because the path is not valid or not existent.";
 
     /**
-     * @var int
+     * @var string
      */
     protected $code = "D2H-ERR-2";
 }

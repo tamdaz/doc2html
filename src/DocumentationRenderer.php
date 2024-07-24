@@ -8,6 +8,7 @@ use DOMDocument;
 use DOMException;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use Barryvdh\Reflection\DocBlock;
 
 /**
@@ -21,7 +22,7 @@ class DocumentationRenderer
     private DOMDocument $dom;
 
     /**
-     * @param ReflectionClass $class
+     * @param ReflectionClass<ReflectionMethod|ReflectionProperty> $class
      * @param string $path
      */
     public function __construct(
@@ -79,6 +80,10 @@ class DocumentationRenderer
         $asideLeft->appendChild($h2);
 
         // Group of namespaces.
+        /**
+         * @var string $namespace
+         * @var array<int, ReflectionClass<ReflectionMethod|ReflectionProperty>> $classes
+         */
         foreach (Classmap::getInstance()->getGroupNamespacesName() as $namespace => $classes) {
             $div = $this->dom->createElement("div");
 

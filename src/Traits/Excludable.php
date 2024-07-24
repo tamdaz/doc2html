@@ -37,7 +37,7 @@ trait Excludable
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getExcludedClasses(): array
     {

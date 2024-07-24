@@ -3,6 +3,8 @@
 namespace Tamdaz\Doc2Html;
 
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use ReflectionException;
 use Tamdaz\Doc2Html\Traits\{Excludable, Includable};
 
@@ -11,12 +13,12 @@ class Classmap
     use Includable, Excludable;
 
     /**
-     * @var array<ReflectionClass>
+     * @var array<int, ReflectionClass<ReflectionMethod|ReflectionProperty>>
      */
     private array $classes = [];
 
     /**
-     * @var array<ReflectionClass>
+     * @var array<string, ReflectionClass<ReflectionMethod|ReflectionProperty>>
      */
     private array $groupNamespacesName = [];
 
@@ -85,7 +87,7 @@ class Classmap
     }
 
     /**
-     * @param array $classmap
+     * @param array<int, string> $classmap
      * @return void
      */
     private function stepExcludeNamespaces(array &$classmap): void
@@ -102,7 +104,7 @@ class Classmap
     }
 
     /**
-     * @param array $classmap
+     * @param array<int, string> $classmap
      * @return void
      */
     private function stepExcludeClasses(array &$classmap): void
@@ -119,8 +121,8 @@ class Classmap
     }
 
     /**
-     * @param array $autoloadClassmap
-     * @param array $classmapToMerge
+     * @param array<string, string> $autoloadClassmap
+     * @param array<int, string> $classmapToMerge
      * @return void
      */
     private function stepIncludeNamespaces(array $autoloadClassmap, array &$classmapToMerge): void
@@ -140,7 +142,7 @@ class Classmap
     }
 
     /**
-     * @param array $classmap
+     * @param array<int, string> $classmap
      * @return void
      */
     private function stepIncludeClasses(array &$classmap): void
@@ -154,7 +156,7 @@ class Classmap
     }
 
     /**
-     * @return array
+     * @return array<int, ReflectionClass<ReflectionMethod|ReflectionProperty>>
      */
     public function getClasses(): array
     {
@@ -162,13 +164,16 @@ class Classmap
     }
 
     /**
-     * @param array $classes
+     * @param array<int, ReflectionClass<ReflectionMethod|ReflectionProperty>> $classes
      */
     public function setClasses(array $classes): void
     {
         $this->classes = $classes;
     }
 
+    /**
+     * @return array<string, ReflectionClass<ReflectionMethod|ReflectionProperty>>|array<string, array<int, string>>
+     */
     public function getGroupNamespacesName(): array
     {
         if (empty($this->groupNamespacesName)) {

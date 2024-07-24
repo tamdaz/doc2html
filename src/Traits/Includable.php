@@ -23,7 +23,7 @@ trait Includable
 
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getIncludedNamespaces(): array
     {
@@ -43,7 +43,7 @@ trait Includable
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getIncludedClasses(): array
     {

@@ -19,13 +19,13 @@ class MagicMethodsExample
      * __call magic method.
      *
      * @param string $name
-     * @param array $arguments
+     * @param array<int, mixed> $arguments
      *
      * @return void
      */
     public function __call(string $name, array $arguments): void
     {
-        // ..
+        // ...
     }
 
     /**
@@ -51,7 +51,7 @@ class MagicMethodsExample
     /**
      * __debugInfo magic method.
      *
-     * @return array|null
+     * @return array<int, mixed>|null
      */
     public function __debugInfo(): ?array
     {
@@ -99,13 +99,13 @@ class MagicMethodsExample
      */
     public function __isset(string $name): bool
     {
-        return $name;
+        return true;
     }
 
     /**
      * __serialize magic method.
      *
-     * @return array
+     * @return array<int, mixed>
      */
     public function __serialize(): array
     {
@@ -125,7 +125,7 @@ class MagicMethodsExample
     /**
      * __unserialize magic method.
      *
-     * @param array $data
+     * @param array<int, mixed> $data
      * @return void
      */
     public function __unserialize(array $data): void
@@ -158,7 +158,7 @@ class MagicMethodsExample
      * __callStatic magic method.
      *
      * @param string $name
-     * @param array $arguments
+     * @param array<int, mixed> $arguments
      * @return void
      */
     public static function __callStatic(string $name, array $arguments)
@@ -169,7 +169,7 @@ class MagicMethodsExample
     /**
      * __set_state magic method.
      *
-     * @param array $an_array
+     * @param array<int, mixed> $an_array
      * @return object
      */
     public static function __set_state(array $an_array): object
@@ -182,6 +182,6 @@ class MagicMethodsExample
      */
     public function __destruct()
     {
-        return "Class destroyed.";
+        echo "Class destroyed.";
     }
 }
