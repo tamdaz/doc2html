@@ -2,7 +2,7 @@
     "name": "tamdaz/doc2html",
     "description": "A tool that enables to convert PHP docs in HTML files.",
     "minimum-stability": "dev",
-    "keywords": ["dev"],
+    "keywords": ["dev", "generator", "phpdoc"],
     "type": "library",
     "license": "MIT",
     "prefer-stable": true,
