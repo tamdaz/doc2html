@@ -5,3 +5,7 @@ PHP_MIN_VERSION=8.2
 support:
 	@./vendor/bin/phpcs -p ./src ./examples ./generators --colors \
 	--standard=PHPCompatibility --runtime-set testVersion $(PHP_MIN_VERSION)-
+
+.PHONY: analyze
+analyze:
+	@./vendor/bin/phpstan analyze src/ examples/ --level 6
