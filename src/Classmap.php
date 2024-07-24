@@ -183,7 +183,7 @@ class Classmap
                 $output[$class->getNamespaceName()][] = $class->getShortName();
             }
 
-            return $output;
+            $this->groupNamespacesName = $output;
         }
 
         return $this->groupNamespacesName;
