@@ -5,14 +5,6 @@ namespace Tamdaz\Doc2Html;
 class Config
 {
     /**
-     * Get the config from the project.
-     *
-     * @info This config path is stored as property to keep it absolute.
-     * @var string
-     */
-    private static string $CONFIG_PATH = __DIR__ . '/../../../../doc2html.config.php';
-
-    /**
      * Get the config from this library.
      *
      * @info This config path is stored as property to keep it absolute (for dev mode only).
@@ -21,9 +13,26 @@ class Config
     private static string $DEV_CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
 
     /**
-     * @var bool
+     * Get the config from this library.
+     *
+     * @info This config path is stored as property to keep it absolute (for test mode only).
+     * @var string
      */
-    public static bool $isDevMode = false;
+    private static string $TEST_CONFIG_PATH = __DIR__ . '/../test.doc2html.config.php';
+
+    /**
+     * Get the config from the project.
+     *
+     * @info This config path is stored as property to keep it absolute.
+     * @var string
+     */
+    private static string $CONFIG_PATH = __DIR__ . '/../../../../doc2html.config.php';
+
+    /**
+     * @var string
+     * @psalm-var "dev"|"test"|"prod"
+     */
+    public static string $envMode = "prod";
 
     /**
      * Get the output path where documentations will be saved.
@@ -78,25 +87,16 @@ class Config
     }
 
     /**
-     * Get the output path where documentations will be saved.
-     *
-     * @return array<string>
-     */
-    public static function getTargetNamespaces(): array
-    {
-        return self::getConfig()->target_namespaces;
-    }
-
-    /**
      * Allows to get the PHP config named "config.php".
      *
      * @return object
      */
-    private static function getConfig(): object
+    public static function getConfig(): object
     {
-        if (self::$isDevMode === true)
-            return (object) require self::$DEV_CONFIG_PATH;
-        else
-            return (object) require self::$CONFIG_PATH;
+        return match (self::$envMode) {
+            "dev" => (object) require self::$DEV_CONFIG_PATH,
+            "test" => (object) require self::$TEST_CONFIG_PATH,
+            "prod" => (object) require self::$CONFIG_PATH
+        };
     }
 }
