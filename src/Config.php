@@ -10,7 +10,7 @@ class Config
      * @info This config path is stored as property to keep it absolute.
      * @var string
      */
-    private const string CONFIG_PATH = __DIR__ . '/../../../../doc2html.config.php';
+    private static string $CONFIG_PATH = __DIR__ . '/../../../../doc2html.config.php';
 
     /**
      * Get the config from this library.
@@ -18,7 +18,7 @@ class Config
      * @info This config path is stored as property to keep it absolute (for dev mode only).
      * @var string
      */
-    private const string DEV_CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
+    private static string $DEV_CONFIG_PATH = __DIR__ . '/../doc2html.config.php';
 
     /**
      * @var bool
@@ -95,8 +95,8 @@ class Config
     private static function getConfig(): object
     {
         if (self::$isDevMode === true)
-            return (object) require self::DEV_CONFIG_PATH;
+            return (object) require self::$DEV_CONFIG_PATH;
         else
-            return (object) require self::CONFIG_PATH;
+            return (object) require self::$CONFIG_PATH;
     }
 }
