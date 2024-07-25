@@ -32,7 +32,7 @@ class PersonExample
     /**
      * Set a salary.
      *
-     * @param int $salary
+     * @param int $salary New salary
      * @return void
      */
     public function setSalary(int $salary): void
@@ -41,7 +41,7 @@ class PersonExample
     }
 
     /**
-     * Get a age.
+     * Get an age.
      *
      * @return int
      */
@@ -51,9 +51,9 @@ class PersonExample
     }
 
     /**
-     * Set a age.
+     * Set an age.
      *
-     * @param int $age
+     * @param int $age New age
      * @return void
      */
     public function setAge(int $age): void
@@ -74,7 +74,7 @@ class PersonExample
     /**
      * Set a name.
      *
-     * @param string $name
+     * @param string $name New name
      * @return void
      */
     public function setName(string $name): void
