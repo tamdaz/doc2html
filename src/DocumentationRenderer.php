@@ -4,23 +4,18 @@ namespace Tamdaz\Doc2Html;
 
 use Exception;
 use Reflection;
-use DOMDocument;
 use DOMException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Barryvdh\Reflection\DocBlock;
+use Tamdaz\Doc2Html\Enums\TagType;
 
 /**
- * Class that allows to convert PHP documentations in HTML file.
+ * Render PHPDoc in HTML files.
  */
-class DocumentationRenderer
+class DocumentationRenderer extends DOMRenderer
 {
-    /**
-     * @var DOMDocument
-     */
-    private DOMDocument $dom;
-
     /**
      * @param ReflectionClass<ReflectionMethod|ReflectionProperty> $class
      * @param string $path
@@ -29,7 +24,7 @@ class DocumentationRenderer
         private ReflectionClass $class,
         private string $path
     ) {
-        $this->dom = new DOMDocument("1.0");
+        parent::__construct();
     }
 
     /**
@@ -42,15 +37,15 @@ class DocumentationRenderer
         $outputPath = $this->getPath() . $this->class->getShortName() . ".html";
 
         // To avoid that "DOMDocument" class triggers a warning because of HTML5 semantic tags,
-        // an arobase (@) is specified during HTML file is loading.
+        // an arobase (@) is specified during that an HTML file is loading.
         @$this->dom->loadHTMLFile(__DIR__ . '/../templates/empty-doc.html');
 
-        $this->renderListOfClasses();
+        $this->renderListOfNamespaces();
         $this->renderDocumentationFromMethods();
         $this->renderListOfProperties();
         $this->renderListOfMethods();
 
-        $this->dom->saveHTMLFile($outputPath);
+        $this->saveHTMLPage($outputPath);
     }
 
     /**
@@ -67,42 +62,29 @@ class DocumentationRenderer
     }
 
     /**
-     * Allows to display all classes.
+     * Allows to display a list of namespaces. Each namespace contain the classes.
      *
      * @throws DOMException
      * @throws Exception
      */
-    private function renderListOfClasses(): void
+    private function renderListOfNamespaces(): void
     {
         $asideLeft = $this->dom->getElementById("asideNamespacesAndClasses");
 
-        $h2 = $this->dom->createElement("h2", "Classes");
-        $asideLeft->appendChild($h2);
+        $this->createElement($asideLeft, TagType::H2_ELEMENT, "Classes");
 
-        // Group of namespaces.
-        /**
-         * @var string $namespace
-         * @var array<int, ReflectionClass<ReflectionMethod|ReflectionProperty>> $classes
-         */
-        foreach (Classmap::getInstance()->getGroupNamespacesName() as $namespace => $classes) {
-            $div = $this->dom->createElement("div");
-
-            $h3 = $this->dom->createElement("h3", $namespace);
-            $div->appendChild($h3);
-
-            $ul = $this->dom->createElement("ul");
+        foreach (Classmap::getInstance()->getClassesGroupedByNamespaces() as $namespace => $classes) {
+            $div = $this->createElement($asideLeft, TagType::DIV_ELEMENT);
+            $this->createElement($div, TagType::H3_ELEMENT, $namespace);
+            $ul = $this->createElement($div, TagType::UL_ELEMENT);
 
             foreach ($classes as $class) {
-                $li = $this->dom->createElement("li");
-                $a = $this->dom->createElement("a", $class);
-                $a->setAttribute("href", $class . ".html");
+                $li = $this->createElement($ul, TagType::LI_ELEMENT);
 
-                $li->appendChild($a);
-                $ul->appendChild($li);
+                $this->createElement($li, TagType::A_ELEMENT, $class, [
+                    'href' => $class . ".html"
+                ]);
             }
-
-            $div->appendChild($ul);
-            $asideLeft->appendChild($div);
         }
     }
 
@@ -121,6 +103,7 @@ class DocumentationRenderer
         foreach ($method->getParameters() as $key => $parameter) {
             $signature .= $parameter->getType() . " $" . $parameter->getName();
 
+            // Add a comma if it's not the last argument.
             if ($key !== array_key_last($method->getParameters()))
                 $signature .= ", ";
         }
@@ -142,50 +125,86 @@ class DocumentationRenderer
     {
         $main = $this->dom->getElementById("mainBlock");
 
-        $title = $this->dom->createElement("h1", $this->class->getShortName());
-        $title->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace");
-
-        $main->appendChild($title);
+        $this->createElement($main, TagType::H1_ELEMENT, $this->class->getShortName(), [
+            "style" => "font-family: Ubuntu Sans Mono, monospace"
+        ]);
 
         $description = (new DocBlock($this->class))->getShortDescription();
-        $p = $this->dom->createElement("p", $description);
-        $main->appendChild($p);
+        $this->createElement($main, TagType::P_ELEMENT, $description);
 
         foreach ($this->class->getMethods() as $method) {
             $docBlock = new DocBlock($method);
 
-            $methodName = $method->getName();
-            $returnType = $method->getReturnType();
+            [$methodName, $returnType] = [
+                $method->getName(),
+                $method->getReturnType()
+            ];
 
-            $divId = "doc2html_method_" . $methodName;
-
-            $div = $this->dom->createElement("div");
-            $div->setAttribute("id", $divId);
-            $div->setAttribute("style", "border-bottom: 1px solid lightgrey");
-
-            if (!empty($returnType)) {
-                $h2 = $this->dom->createElement("h1", "# $methodName(): $returnType");
-            } else {
-                $h2 = $this->dom->createElement("h1", "# $methodName()");
-            }
-
-            $pre = $this->dom->createElement("pre", $this->buildSignature($method));
-
-            $h2->setAttribute("style", "font-family: Ubuntu Sans Mono, monospace");
-            $p = $this->dom->createElement("p", $docBlock->getShortDescription());
+            $cssProps = "border-bottom: 1px solid lightgrey; padding: 4px 16px;";
 
             if ($docBlock->hasTag("deprecated")) {
-                $deprecationMessage = $docBlock->getTagsByName("deprecated")[0]->getDescription();
-
-                $div->setAttribute("style", "background-color: yellow; padding: 2px 16px 16px 16px");
-                $b = $this->dom->createElement("b", "DEPRECATION WARNING : $deprecationMessage");
-
-                $div->append($h2, $pre, $p, $b);
+                $cssProps .= "background-color: yellow;";
             } else {
-                $div->append($h2, $pre, $p);
+                if ($method->isPublic())
+                    $cssProps .= "background-color: #e9ffe6;";
+                elseif ($method->isProtected())
+                    $cssProps .= "background-color: #fffde6;";
+                elseif ($method->isPrivate())
+                    $cssProps .= "background-color: #ffe6e6;";
             }
 
-            $main->appendChild($div);
+            $div = $this->createElement($main, TagType::DIV_ELEMENT, attributes: [
+                "id"    => "doc2html_method_" . $methodName,
+                "style" => $cssProps
+            ]);
+
+            $methodTitle = "";
+
+            if ($method->isPublic())
+                $methodTitle = "&#x1F513;"; // cadenas ouvert
+            elseif ($method->isProtected())
+                $methodTitle = "&#128273;"; // key emoji
+            elseif ($method->isPrivate())
+                $methodTitle = "&#128274;"; // cadenas fermé
+
+            $methodTitle .= " $methodName()";
+
+            if (!empty($returnType))
+                $methodTitle .= ": $returnType";
+
+            $this->createElement($div, TagType::H2_ELEMENT, $methodTitle, [
+                "style" => "font-family: Ubuntu Sans Mono, monospace"
+            ]);
+
+            $this->createElement($div, TagType::PRE_ELEMENT, $this->buildSignature($method), [
+                'style' => 'width: 800px'
+            ]);
+
+            $this->createElement($div, TagType::P_ELEMENT, $docBlock->getShortDescription());
+
+            if (!empty($docBlock->getTagsByName('param'))) {
+                $this->createElement($div, TagType::H3_ELEMENT, "Arguments");
+
+                foreach ($docBlock->getTagsByName("param") as $param) {
+                    // Put the arobase to ignore warnings.
+                    @[$paramType, $paramName, $paramDescription] = @explode(" ", $param->getContent(), 3);
+
+                    $infoParam = "$paramType, $paramName : $paramDescription";
+                    $this->createElement($div, TagType::P_ELEMENT, $infoParam);
+                }
+            }
+
+            if ($docBlock->hasTag("deprecated")) {
+                $deprecationMessage = "DEPRECATION WARNING : " .
+                    $docBlock
+                        ->getTagsByName("deprecated")[0]
+                        ->getDescription()
+                ;
+
+                $this->createElement($div, TagType::P_ELEMENT, $deprecationMessage, [
+                    'style' => "font-weight: bold;"
+                ]);
+            }
         }
     }
 
@@ -198,21 +217,15 @@ class DocumentationRenderer
     {
         $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
 
-        $span = $this->dom->createElement("h2", "Properties");
-        $asideRight->appendChild($span);
-
-        $ul = $this->dom->createElement("ul");
+        $this->createElement($asideRight, TagType::H2_ELEMENT, "Properties");
+        $ul = $this->createElement($asideRight, TagType::UL_ELEMENT);
 
         foreach ($this->class->getProperties() as $property) {
-            $li = $this->dom->createElement("li");
-            $a = $this->dom->createElement("a", $property->getName());
-            $a->setAttribute("href", "#doc2html_property_" . $property->getName());
-
-            $li->appendChild($a);
-            $ul->appendChild($li);
+            $li = $this->createElement($ul, TagType::LI_ELEMENT);
+            $this->createElement($li, TagType::A_ELEMENT, $property->getName(), [
+                "href" => "#doc2htmlProperty" . $property->getName()
+            ]);
         }
-
-        $asideRight->appendChild($ul);
     }
 
     /**
@@ -224,20 +237,14 @@ class DocumentationRenderer
     {
         $asideRight = $this->dom->getElementById("asidePropertiesAndMethods");
 
-        $span = $this->dom->createElement("h2", "Methods");
-        $asideRight->appendChild($span);
-
-        $ul = $this->dom->createElement("ul");
+        $this->createElement($asideRight, TagType::H2_ELEMENT, "Methods");
+        $ul = $this->createElement($asideRight, TagType::UL_ELEMENT);
 
         foreach ($this->class->getMethods() as $method) {
-            $li = $this->dom->createElement("li");
-            $a = $this->dom->createElement("a", $method->getName());
-            $a->setAttribute("href", "#doc2html_method_" . $method->getName());
-
-            $li->appendChild($a);
-            $ul->appendChild($li);
+            $li = $this->createElement($ul, TagType::LI_ELEMENT);
+            $this->createElement($li, TagType::A_ELEMENT, $method->getName(), [
+                "href" => "#doc2html_method_" . $method->getName()
+            ]);
         }
-
-        $asideRight->appendChild($ul);
     }
 }
