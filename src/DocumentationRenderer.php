@@ -140,7 +140,7 @@ class DocumentationRenderer extends DOMRenderer
                 $method->getReturnType()
             ];
 
-            $cssProps = "border-bottom: 1px solid lightgrey; padding: 4px 16px;";
+            $cssProps = "border-bottom: 1px solid lightgrey; padding: 4px 24px 16px 24px;";
 
             if ($docBlock->hasTag("deprecated")) {
                 $cssProps .= "background-color: yellow;";
@@ -176,9 +176,7 @@ class DocumentationRenderer extends DOMRenderer
                 "style" => "font-family: Ubuntu Sans Mono, monospace"
             ]);
 
-            $this->createElement($div, TagType::PRE_ELEMENT, $this->buildSignature($method), [
-                'style' => 'width: 800px'
-            ]);
+            $this->createElement($div, TagType::PRE_ELEMENT, $this->buildSignature($method));
 
             $this->createElement($div, TagType::P_ELEMENT, $docBlock->getShortDescription());
 
