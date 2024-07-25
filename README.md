@@ -1,9 +1,14 @@
+> [!WARNING]
+> For the moment, this project is in the development phase. It is not yet completely finished.
+
 # doc2html
+
+![Packagist License](https://img.shields.io/packagist/l/tamdaz/doc2html)
+![Packagist Version](https://img.shields.io/packagist/v/tamdaz/doc2html)
 
 doc2html is a tool that enables to convert PHP documentation in HTML files.
 
-> [!WARNING]
-> _For the moment, this project is in the development phase. It is not yet completely finished._
+![cover image](https://repository-images.githubusercontent.com/827879105/e2822103-440c-4fd3-ab1a-cc117473c3b4)
 
 ## Installation
 ```shell
@@ -70,6 +75,13 @@ For information, this library uses the classmap of Composer to allow you
 to choose those you do not want to generate documentation.
 
 After that, you can generate it by executing `./vendor/bin/doc2html`.
+
+> [!TIP]
+> You can create an alias for this command and save it in `~/.bashrc` file.
+
+```shell
+export doc2html="./vendor/bin/doc2html"
+```
 
 ## Contributors
 Any contributions are welcome.
