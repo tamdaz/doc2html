@@ -19,7 +19,7 @@ class Classmap
     private array $classes = [];
 
     /**
-     * @var array<string, ReflectionClass<ReflectionMethod|ReflectionProperty>>
+     * @var array<string, array<int, string>>
      */
     private array $groupNamespacesName = [];
 
@@ -173,7 +173,7 @@ class Classmap
     }
 
     /**
-     * @return array<string, ReflectionClass<ReflectionMethod|ReflectionProperty>>|array<string, array<int, string>>
+     * @return array<string, array<int, string>>
      */
     public function getGroupNamespacesName(): array
     {
