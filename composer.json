@@ -31,7 +31,11 @@
     },
     "scripts": {
         "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
-        "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility"
+        "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "test": "./vendor/bin/phpunit --testdox --color",
+        "analyze": "./vendor/bin/phpstan analyze src/ examples/ --level 6",
+        "support": "./vendor/bin/phpcs -p ./src ./examples ./generators --colors \\\n\t--standard=PHPCompatibility --runtime-set testVersion 8.2-"
+
     },
     "require": {
         "ext-dom": "*",
