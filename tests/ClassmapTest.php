@@ -66,7 +66,7 @@ class ClassmapTest extends TestCase
     {
         self::$classmap->generate();
 
-        $classmap = self::$classmap->getGroupNamespacesName();
+        $classmap = self::$classmap->getClassesGroupedByNamespaces();
         $expected = [
             "Examples" => [
                 // Sort A-Z
