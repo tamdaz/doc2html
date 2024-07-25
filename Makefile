@@ -9,3 +9,7 @@ support:
 .PHONY: analyze
 analyze:
 	@./vendor/bin/phpstan analyze src/ examples/ --level 6
+
+.PHONY: test
+test:
+	@./vendor/bin/phpunit --testdox --color
