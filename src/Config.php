@@ -55,6 +55,8 @@ class Config
     }
 
     /**
+     * Get the namespaces to include.
+     *
      * @return array<string>
      */
     public static function includeNamespaces(): array
@@ -63,6 +65,8 @@ class Config
     }
 
     /**
+     * Get the namespaces to exclude.
+     *
      * @return array<string>
      */
     public static function excludeNamespaces(): array
@@ -71,6 +75,8 @@ class Config
     }
 
     /**
+     * Get the classes to include.
+     *
      * @return array<string>
      */
     public static function includeClasses(): array
@@ -79,6 +85,8 @@ class Config
     }
 
     /**
+     * Get the namespaces to exclude.
+     *
      * @return array<string>
      */
     public static function excludeClasses(): array
@@ -87,7 +95,7 @@ class Config
     }
 
     /**
-     * Allows to get the PHP config named "config.php".
+     * Get a PHP configuration file named "config.php".
      *
      * @return object
      */
