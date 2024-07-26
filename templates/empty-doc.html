@@ -42,19 +42,26 @@
             main {
                 flex-grow: 1;
 
-                display: inline-block;
                 overflow-y: scroll;
                 overflow-x: hidden;
-
-                border-left: 1px solid lightgray;
-                border-right: 1px solid lightgray;
-
-                padding: 16px;
             }
 
             pre {
                 white-space: pre-wrap;
                 line-height: 1.5;
+            }
+
+            #mainBlock > div, h1, p {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            #mainBlock > h1 {
+                padding: 32px 0 16px 0;
+            }
+
+            #mainBlock > p {
+                padding-bottom: 16px;
             }
 
             a {
