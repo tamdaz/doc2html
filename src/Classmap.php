@@ -21,7 +21,7 @@ class Classmap
     /**
      * @var array<string, array<int, string>>
      */
-    private array $groupNamespacesName = [];
+    private array $classesGroupedByNamespaces = [];
 
     /**
      * @var Classmap|null
@@ -175,18 +175,19 @@ class Classmap
     /**
      * @return array<string, array<int, string>>
      */
-    public function getGroupNamespacesName(): array
+    public function getClassesGroupedByNamespaces(): array
     {
-        if (empty($this->groupNamespacesName)) {
+        if (empty($this->classesGroupedByNamespaces)) {
             $output = [];
 
             foreach ($this->getClasses() as $class) {
                 $output[$class->getNamespaceName()][] = $class->getShortName();
             }
 
-            $this->groupNamespacesName = $output;
+            $this->classesGroupedByNamespaces = $output;
         }
 
-        return $this->groupNamespacesName;
+        // Since we have already grouped the classes by namespaces, we return this property directly.
+        return $this->classesGroupedByNamespaces;
     }
 }
