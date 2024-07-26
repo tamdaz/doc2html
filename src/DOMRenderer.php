@@ -2,8 +2,8 @@
 
 namespace Tamdaz\Doc2Html;
 
-use DOMDocument;
 use DOMElement;
+use DOMDocument;
 use DOMException;
 use Tamdaz\Doc2Html\Enums\TagType;
 
@@ -22,6 +22,11 @@ class DOMRenderer
     /**
      * Add a new element and add it to parent element.
      *
+     * @param DOMElement $parentElement
+     * @param TagType|string $tag
+     * @param mixed|null $value
+     * @param array<string, mixed>|null $attributes
+     * @return DOMElement
      * @throws DOMException
      */
     protected function createElement(
