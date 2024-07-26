@@ -45,9 +45,9 @@ class DOMRenderer
      * Render HTML page and save it as a file.
      *
      * @param string $path
-     * @return int|bool
+     * @return bool
      */
-    protected function saveHTMLPage(string $path): int|bool
+    protected function saveHTMLPage(string $path): bool
     {
         return $this->dom->saveHTMLFile($path);
     }
