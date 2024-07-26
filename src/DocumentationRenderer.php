@@ -40,7 +40,7 @@ class DocumentationRenderer extends DOMRenderer
         // an arobase (@) is specified during that an HTML file is loading.
         @$this->dom->loadHTMLFile(__DIR__ . '/../templates/empty-doc.html');
 
-        $this->renderListOfNamespaces();
+        $this->renderGroupedClassesByNamespaces();
         $this->renderDocumentationFromMethods();
         $this->renderListOfProperties();
         $this->renderListOfMethods();
@@ -67,7 +67,7 @@ class DocumentationRenderer extends DOMRenderer
      * @throws DOMException
      * @throws Exception
      */
-    private function renderListOfNamespaces(): void
+    private function renderGroupedClassesByNamespaces(): void
     {
         $asideLeft = $this->dom->getElementById("asideNamespacesAndClasses");
 
