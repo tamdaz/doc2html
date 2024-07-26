@@ -46,27 +46,42 @@ class Reflectors
         $startTime = microtime(true);
 
         foreach ($classmap->getClasses() as $class) {
-            if (Config::isVerbose())
-                LoggerOutput::progress("Generating documentation for {$class->getShortName()} class in HTML file...\r");
-            else
-                LoggerOutput::progress("In progress: $step of $maxStep (" . round($step / $maxStep * 100) . "%)\r");
+
+            $diffTime = microtime(true);
+            $time = number_format($diffTime - $startTime, 2, '\'', ':');
+
+            if (Config::isVerbose()) {
+                LoggerOutput::progress(
+                    "Generating documentation for {$class->getShortName()} class in HTML file...\r"
+                );
+            } else {
+                LoggerOutput::progress(
+                    "In progress: $step of $maxStep (" . round($step / $maxStep * 100) . "%, " . $time . " sec)\r"
+                );
+            }
 
             (new DocumentationRenderer($class, $path))->render();
 
             $step++;
 
-            if (Config::isVerbose())
-                LoggerOutput::success("Generating documentation for {$class->getShortName()} class in HTML file...\n");
+            if (Config::isVerbose()) {
+                LoggerOutput::success(
+                    "Generating documentation for {$class->getShortName()} class in HTML file...\n"
+                );
+            }
         }
 
         $endTime = microtime(true);
+        $time = number_format($endTime - $startTime, 2, '\'', ':');
 
-        $time = $endTime - $startTime;
+        // Add a new line to avoid overwrite the last log.
+        echo (!Config::isVerbose()) ? "\n" : null;
 
         LoggerOutput::success("Documentation successfully generated !\n");
 
         // 1 is a second.
-        if ($time >= 1.0)
-            LoggerOutput::info("Took " . date("i:s", (int) $time) . " sec.\n");
+        if ($time >= 1.0) {
+            LoggerOutput::info("Took " . $time . " sec.\n");
+        }
     }
 }
