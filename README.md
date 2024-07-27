@@ -7,6 +7,7 @@
 ![Packagist Version](https://img.shields.io/packagist/v/tamdaz/doc2html)
 
 doc2html is a tool that enables to convert PHP documentation in HTML files.
+This tool can be used for any PHP project (namely Symfony, Laravel, Slim, CakePHP...)
 
 ![cover image](https://repository-images.githubusercontent.com/827879105/e2822103-440c-4fd3-ab1a-cc117473c3b4)
 
