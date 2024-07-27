@@ -54,6 +54,10 @@ class DOMRenderer
      */
     protected function saveHTMLPage(string $path): bool
     {
+        // Create the folder (not the file) if it does not exist.
+        if (!file_exists(Config::getOutputDir()))
+            mkdir(Config::getOutputDir(), 0755); // default directory permission.
+
         return $this->dom->saveHTMLFile($path);
     }
 }
