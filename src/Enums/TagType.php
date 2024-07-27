@@ -2,6 +2,9 @@
 
 namespace Tamdaz\Doc2Html\Enums;
 
+/**
+ * Contains all HTML standard tag names.
+ */
 enum TagType: string
 {
     case SPAN_ELEMENT = "span";
@@ -21,4 +24,10 @@ enum TagType: string
     case UL_ELEMENT = "ul";
     case OL_ELEMENT = "ol";
     case LI_ELEMENT = "li";
+    case TABLE_ELEMENT = "table";
+    case THEAD_ELEMENT = "thead";
+    case TBODY_ELEMENT = "tbody";
+    case TR_ELEMENT = "tr";
+    case TH_ELEMENT = "th";
+    case TD_ELEMENT = "td";
 }
