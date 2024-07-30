@@ -30,4 +30,5 @@ enum TagType: string
     case TR_ELEMENT = "tr";
     case TH_ELEMENT = "th";
     case TD_ELEMENT = "td";
+    case BR_ELEMENT = "br";
 }
