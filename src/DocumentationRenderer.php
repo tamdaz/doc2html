@@ -3,6 +3,7 @@
 namespace Tamdaz\Doc2Html;
 
 use Exception;
+use DOMElement;
 use Reflection;
 use DOMException;
 use ReflectionClass;
@@ -117,6 +118,76 @@ class DocumentationRenderer extends DOMRenderer
     }
 
     /**
+     * Give CSS properties depending on the scope and the deprecation.
+     *
+     * @param DocBlock $docBlock
+     * @param ReflectionMethod $method
+     * @return string A CSS property for the method.
+     */
+    private function giveCSSPropsToMethod(DocBlock $docBlock, ReflectionMethod $method): string
+    {
+        $cssProps = "border-bottom: 1px solid lightgrey; padding: 4px 24px 16px 24px;";
+
+        if ($docBlock->hasTag("deprecated")) {
+            $cssProps .= "background-color: yellow;";
+        } else {
+            if ($method->isPublic())
+                $cssProps .= "background-color: #e9ffe6;";
+            elseif ($method->isProtected())
+                $cssProps .= "background-color: #fffde6;";
+            elseif ($method->isPrivate())
+                $cssProps .= "background-color: #ffe6e6;";
+        }
+
+        return $cssProps;
+    }
+
+    /**
+     * Give the title of the method.
+     *
+     * @param ReflectionMethod $method
+     * @return string
+     */
+    private function giveTitleOfMethod(ReflectionMethod $method): string
+    {
+        $methodTitle = "";
+
+        if ($method->isPublic())
+            $methodTitle = "&#x1F513;"; // open lock emoji.
+        elseif ($method->isProtected())
+            $methodTitle = "&#128273;"; // key emoji.
+        elseif ($method->isPrivate())
+            $methodTitle = "&#128274;"; // close lock emoji.
+
+        $methodTitle .= " {$method->getName()}()";
+
+        if (!empty($method->getReturnType()))
+            $methodTitle .= ": " . $method->getReturnType();
+
+        return $methodTitle;
+    }
+
+    /**
+     * Display the deprecation message if the "@deprecated" annotation is indicated.
+     *
+     * @param DocBlock $docBlock
+     * @param DOMElement $element
+     * @return void
+     * @throws DOMException
+     */
+    private function displayDeprecationMessage(DOMElement $element, DocBlock $docBlock): void
+    {
+        if ($docBlock->hasTag("deprecated")) {
+            $description = $docBlock->getTagsByName("deprecated")[0]->getDescription();
+            $deprecationMessage = "DEPRECATION WARNING : $description";
+
+            $this->createElement($element, TagType::P_ELEMENT, $deprecationMessage, [
+                'style' => "font-weight: bold;"
+            ]);
+        }
+    }
+
+    /**
      * Allows to display a documentation for each method.
      *
      * @throws DOMException
@@ -124,86 +195,28 @@ class DocumentationRenderer extends DOMRenderer
     private function renderDocumentationFromMethods(): void
     {
         $main = $this->dom->getElementById("mainBlock");
+        $docBlock = (new DocBlock($this->class));
 
         $this->createElement($main, TagType::H1_ELEMENT, $this->class->getShortName(), [
             "style" => "font-family: Ubuntu Sans Mono, monospace"
         ]);
 
-        $description = (new DocBlock($this->class))->getShortDescription();
-        $this->createElement($main, TagType::P_ELEMENT, $description);
+        $this->createElement($main, TagType::P_ELEMENT, $docBlock->getShortDescription());
 
-        foreach ($this->class->getMethods() as $method) {
-            $docBlock = new DocBlock($method);
-
-            [$methodName, $returnType] = [
-                $method->getName(),
-                $method->getReturnType()
-            ];
-
-            $cssProps = "border-bottom: 1px solid lightgrey; padding: 4px 24px 16px 24px;";
-
-            if ($docBlock->hasTag("deprecated")) {
-                $cssProps .= "background-color: yellow;";
-            } else {
-                if ($method->isPublic())
-                    $cssProps .= "background-color: #e9ffe6;";
-                elseif ($method->isProtected())
-                    $cssProps .= "background-color: #fffde6;";
-                elseif ($method->isPrivate())
-                    $cssProps .= "background-color: #ffe6e6;";
-            }
-
+        foreach ($docBlock->getTags() as $tag) {
             $div = $this->createElement($main, TagType::DIV_ELEMENT, attributes: [
-                "id"    => "doc2html_method_" . $methodName,
-                "style" => $cssProps
+                'style' => 'padding: 8px 0'
             ]);
 
-            $methodTitle = "";
-
-            if ($method->isPublic())
-                $methodTitle = "&#x1F513;"; // cadenas ouvert
-            elseif ($method->isProtected())
-                $methodTitle = "&#128273;"; // key emoji
-            elseif ($method->isPrivate())
-                $methodTitle = "&#128274;"; // cadenas fermé
-
-            $methodTitle .= " $methodName()";
-
-            if (!empty($returnType))
-                $methodTitle .= ": $returnType";
-
-            $this->createElement($div, TagType::H2_ELEMENT, $methodTitle, [
-                "style" => "font-family: Ubuntu Sans Mono, monospace"
+            $this->createElement($div, TagType::SPAN_ELEMENT, strtoupper($tag->getName()), [
+                'style' => 'font-weight: bold; margin-right: 16px; padding: 6px 14px; background-color: grey; border-radius: 16px; color: white'
             ]);
-
-            $this->createElement($div, TagType::PRE_ELEMENT, $this->buildSignature($method));
-
-            $this->createElement($div, TagType::P_ELEMENT, $docBlock->getShortDescription());
-
-            if (!empty($docBlock->getTagsByName('param'))) {
-                $this->createElement($div, TagType::H3_ELEMENT, "Arguments");
-
-                foreach ($docBlock->getTagsByName("param") as $param) {
-                    // Put the arobase to ignore warnings.
-                    @[$paramType, $paramName, $paramDescription] = @explode(" ", $param->getContent(), 3);
-
-                    $infoParam = "$paramType, $paramName : $paramDescription";
-                    $this->createElement($div, TagType::P_ELEMENT, $infoParam);
-                }
-            }
-
-            if ($docBlock->hasTag("deprecated")) {
-                $deprecationMessage = "DEPRECATION WARNING : " .
-                    $docBlock
-                        ->getTagsByName("deprecated")[0]
-                        ->getDescription()
-                ;
-
-                $this->createElement($div, TagType::P_ELEMENT, $deprecationMessage, [
-                    'style' => "font-weight: bold;"
-                ]);
-            }
+            $this->createElement($div, TagType::SPAN_ELEMENT, $tag->getDescription());
         }
+
+        $this->createElement($main, TagType::BR_ELEMENT);
+
+        $this->renderMethodBlock($main);
     }
 
     /**
@@ -242,6 +255,62 @@ class DocumentationRenderer extends DOMRenderer
             $li = $this->createElement($ul, TagType::LI_ELEMENT);
             $this->createElement($li, TagType::A_ELEMENT, $method->getName(), [
                 "href" => "#doc2html_method_" . $method->getName()
+            ]);
+        }
+    }
+
+    /**
+     * @throws DOMException
+     */
+    private function renderMethodBlock(DOMElement $element): void
+    {
+        foreach ($this->class->getMethods() as $method) {
+            $docBlock = new DocBlock($method);
+
+            $methodName = $method->getName();
+
+            $div = $this->createElement($element, TagType::DIV_ELEMENT, attributes: [
+                "id"    => "doc2html_method_" . $methodName,
+                "style" => $this->giveCSSPropsToMethod($docBlock, $method)
+            ]);
+
+            $methodTitle = $this->giveTitleOfMethod($method);
+
+            $this->createElement($div, TagType::H2_ELEMENT, $methodTitle, [
+                "style" => "font-family: Ubuntu Sans Mono, monospace"
+            ]);
+            $this->createElement($div, TagType::PRE_ELEMENT, $this->buildSignature($method));
+            $this->createElement($div, TagType::P_ELEMENT, $docBlock->getShortDescription());
+
+            $this->renderTableOfArguments($div, $docBlock);
+            $this->displayDeprecationMessage($div, $docBlock);
+        }
+    }
+
+    /**
+     * Render a table of arguments in the form of type, name and description.
+     * @param DocBlock $docBlock
+     * @param DOMElement $element
+     * @return void
+     * @throws DOMException
+     */
+    private function renderTableOfArguments(DOMElement $element, DocBlock $docBlock): void
+    {
+        if (!empty($docBlock->getTagsByName('param'))) {
+            $this->createElement($element, TagType::H3_ELEMENT, "Arguments");
+
+            $arguments = [];
+
+            foreach ($docBlock->getTagsByName("param") as $argument) {
+                $arguments[] = [
+                    explode(" ", $argument->getContent())[0],
+                    explode(" ", $argument->getContent())[1],
+                    $argument->getDescription()
+                ];
+            }
+
+            $this->createTable($element, $arguments, false, [
+                'style' => 'width: 100%; font-family: Ubuntu Sans Mono, monospace;'
             ]);
         }
     }
