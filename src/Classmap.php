@@ -40,6 +40,18 @@ class Classmap
     }
 
     /**
+     * Get the absolute path to "autoload_classmap.php" file.
+     * @return string
+     */
+    public function getClassmapPath(): string
+    {
+        return str_replace(
+            "/../..", "", // always go to "vendor/composer/" dir
+            InstalledVersions::getRootPackage()["install_path"]
+        ) . "autoload_classmap.php";
+    }
+
+    /**
      * Generate classmap. This method uses classmap from Composer (autoload_classmap.php).
      *
      * @return void
@@ -47,12 +59,7 @@ class Classmap
      */
     public function generate(): void
     {
-        $path = str_replace(
-            "/../..", "", // always go to "vendor/composer/" dir
-            InstalledVersions::getRootPackage()["install_path"]
-        ) . "autoload_classmap.php";
-
-        $autoloadClassmap = require $path;
+        $autoloadClassmap = require $this->getClassmapPath();
 
         // Exclude anything in "vendor/" directory.
         if (!$this->isVendorIncluded()) {
