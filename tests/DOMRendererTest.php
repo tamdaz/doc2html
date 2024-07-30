@@ -1,96 +1,120 @@
 <?php
 
+use Tamdaz\Doc2Html\Config;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 use Tamdaz\Doc2Html\DOMRenderer;
 use Tamdaz\Doc2Html\Enums\TagType;
+use PHPUnit\Framework\Attributes\Test;
 
 class DOMRendererTest extends TestCase
 {
     /**
-     * @throws ReflectionException
-     * @throws DOMException
+     * @var DOMRenderer
      */
-    #[Test]
-    public function testCreateElement(): void
+    protected static DOMRenderer $DOMRenderer;
+
+    public static function setUpBeforeClass(): void
     {
-        [$method, $DOMRenderer, $parentElement] = $this->stepCreateDOM();
+        self::$DOMRenderer = new DOMRenderer();
 
-        $newElement = $method->invoke($DOMRenderer, $parentElement, TagType::H1_ELEMENT, 'Hello world');
-
-        $this->assertInstanceOf(DOMElement::class, $newElement);
-        $this->assertSame("Hello world", $newElement->nodeValue);
-        $this->assertSame("h1", $newElement->tagName);
-        $this->assertSame("root", $newElement->parentElement->tagName);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws DOMException
-     */
-    #[Test]
-    public function testCreateElementWithAnAttribute(): void
-    {
-        [$method, $DOMRenderer, $parentElement] = $this->stepCreateDOM();
-
-        $newElement = $method->invoke($DOMRenderer, $parentElement, TagType::H1_ELEMENT, 'Hello world', [
-            'id' => 'myTitle'
-        ]);
-
-        $this->assertInstanceOf(DOMElement::class, $newElement);
-        $this->assertSame("Hello world", $newElement->nodeValue);
-        $this->assertSame("h1", $newElement->tagName);
-        $this->assertSame("root", $newElement->parentElement->tagName);
-
-        $this->assertTrue($newElement->hasAttribute('id'));
-        $this->assertSame("myTitle", $newElement->getAttribute('id'));
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws DOMException
-     */
-    #[Test]
-    public function testCreateElementWithAttributes(): void
-    {
-        [$method, $DOMRenderer, $parentElement] = $this->stepCreateDOM();
-
-        $newElement = $method->invoke($DOMRenderer, $parentElement, TagType::H1_ELEMENT, 'Hello world', [
-            'id' => 'myTitle',
-            'class' => 'myCssClass'
-        ]);
-
-        $this->assertInstanceOf(DOMElement::class, $newElement);
-        $this->assertSame("Hello world", $newElement->nodeValue);
-        $this->assertSame("h1", $newElement->tagName);
-        $this->assertSame("root", $newElement->parentElement->tagName);
-
-        $this->assertTrue($newElement->hasAttribute('id'));
-        $this->assertSame("myTitle", $newElement->getAttribute('id'));
-
-        $this->assertTrue($newElement->hasAttribute('class'));
-        $this->assertSame("myCssClass", $newElement->getAttribute('class'));
+        Config::$envMode = "dev";
     }
 
     /**
      * @return array
      */
-    private function stepCreateDOM(): array
+    private function initializeClass(): array
     {
-        $DOMRenderer = new DOMRenderer();
+        $class = new ReflectionClass(DOMRenderer::class);
 
-        $reflection = new ReflectionClass($DOMRenderer);
+        $prop = $class->getProperty('dom');
+        $prop->setAccessible(true);
 
-        // Get DOMRenderer::$dom property.
-        $property = $reflection->getProperty('dom');
-        $property->setAccessible(true);
+        /** @var DOMDocument $dom */
+        $dom = $prop->getValue(self::$DOMRenderer);
+        $dom->loadHTML("<div id='root'></div>");
+        $root = $dom->getElementById('root');
 
-        $dom = $property->getValue($DOMRenderer);
-        $parentElement = $dom->createElement('root');
+        $createElementMethod = $class->getMethod('createElement');
+        $createElementMethod->setAccessible(true);
 
-        $method = $reflection->getMethod("createElement");
-        $method->setAccessible(true);
+        $saveHTMLPageMethod = $class->getMethod('saveHTMLPage');
+        $saveHTMLPageMethod->setAccessible(true);
 
-        return [$method, $DOMRenderer, $parentElement];
+        return [$root, $createElementMethod, $saveHTMLPageMethod];
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testCreateElement(): void
+    {
+        [$root, $createElementMethod] = $this->initializeClass();
+
+        /** @var DOMElement $newElement */
+        $newElement = $createElementMethod->invoke(self::$DOMRenderer, $root, TagType::H1_ELEMENT, "Hello world");
+
+        $this->assertInstanceOf(DOMElement::class, $newElement);
+        $this->assertSame("Hello world", $newElement->nodeValue);
+        $this->assertSame("h1", $newElement->tagName);
+        $this->assertTrue($newElement->parentElement->tagName === "div");
+        $this->assertTrue($newElement->parentElement->id === "root");
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testCreateElementWithAttributes(): void
+    {
+        [$root, $createElementMethod] = $this->initializeClass();
+
+        /** @var DOMElement $newElement */
+        $newElement = $createElementMethod->invoke(
+            self::$DOMRenderer, $root, TagType::P_ELEMENT, "Lorem ipsum dolor sit amet.", [
+                'id' => 'myNewId',
+                'class' => 'myNewClass'
+            ]
+        );
+
+        $this->assertInstanceOf(DOMElement::class, $newElement);
+        $this->assertSame("p", $newElement->tagName);
+        $this->assertSame("Lorem ipsum dolor sit amet.", $newElement->nodeValue);
+
+        $this->assertTrue($newElement->hasAttribute('id'));
+        $this->assertSame("myNewId", $newElement->getAttribute('id'));
+
+        $this->assertTrue($newElement->hasAttribute('class'));
+        $this->assertSame("myNewClass", $newElement->getAttribute('class'));
+
+        $this->assertTrue($newElement->parentElement->tagName === "div");
+        $this->assertTrue($newElement->parentElement->id === "root");
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testRenderDomInHtml(): void
+    {
+        [$root, $createElementMethod, $saveHTMLPageMethod] = $this->initializeClass();
+
+        /** @var DOMElement $newElement */
+        $createElementMethod->invoke(self::$DOMRenderer, $root, TagType::P_ELEMENT, "Lorem ipsum dolor sit amet.", [
+            'id' => 'myNewId',
+            'class' => 'myNewClass'
+        ]);
+
+        $saveHTMLPageMethod->invoke(self::$DOMRenderer, '/tmp/test.html');
+
+        $result = str_contains(
+            file_get_contents('/tmp/test.html'),
+            '<div id="root"><p id="myNewId" class="myNewClass">Lorem ipsum dolor sit amet.</p></div>'
+        );
+
+        $this->assertTrue($result);
+
+        unlink('/tmp/test.html');
     }
 }
