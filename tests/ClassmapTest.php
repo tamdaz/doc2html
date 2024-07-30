@@ -30,10 +30,10 @@ class ClassmapTest extends TestCase
     #[Test]
     public function testIncludeNamespaceExample(): void
     {
-        self::$classmap->includeNamespaces("Examples\\Exclusions\\Group");
+        self::$classmap->includeNamespaces("Examples\\Exclusions\\Inclusions");
 
         $this->assertSame(
-            ["Examples\\Exclusions\\Group"],
+            ["Examples\\Exclusions\\Inclusions"],
             self::$classmap->getIncludedNamespaces()
         );
     }
@@ -41,20 +41,20 @@ class ClassmapTest extends TestCase
     #[Test]
     public function testExcludeClassInNamespaceExample(): void
     {
-        self::$classmap->excludeClasses("Examples\\DeprecationExample");
+        self::$classmap->excludeClasses("Examples\\Exclusions\\Inclusions\\PersonalExample");
 
         $this->assertTrue(
-            in_array("Examples\\DeprecationExample", self::$classmap->getExcludedClasses())
+            in_array("Examples\\Exclusions\\Inclusions\\PersonalExample", self::$classmap->getExcludedClasses())
         );
     }
 
     #[Test]
     public function testIncludeClassInNamespaceExample(): void
     {
-        self::$classmap->includeClasses("Examples\\Exclusions\\ExceptedClassExample");
+        self::$classmap->includeClasses("Examples\\Exclusions\\PhoneExample");
 
         $this->assertTrue(
-            in_array("Examples\\Exclusions\\ExceptedClassExample", self::$classmap->getIncludedClasses())
+            in_array("Examples\\Exclusions\\PhoneExample", self::$classmap->getIncludedClasses())
         );
     }
 
@@ -68,16 +68,14 @@ class ClassmapTest extends TestCase
 
         $classmap = self::$classmap->getClassesGroupedByNamespaces();
         $expected = [
-            "Examples" => [
-                // Sort A-Z
-                "DeprecationExample", "MagicMethodsExample", "MathExample", "PersonExample"
+            "Examples\\Annotations" => [
+                "BookExample"
             ],
             "Examples\\Exclusions" => [
-                // Sort A-Z
-                "ExceptedClassExample", "ExcludedClassExample",
+                "BookExample", "CarExample", "PersonExample", "PhoneExample"
             ],
-            'Examples\Exclusions\Group' => [
-                'ExceptedGroupClassExample'
+            'Examples\\Exclusions\\Inclusions' => [
+                "ExceptedExample", "PersonalExample"
             ]
         ];
 
