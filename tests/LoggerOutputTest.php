@@ -66,6 +66,21 @@ class LoggerOutputTest extends TestCase
         $this->assertSame(implode(' ', [$expectedType, $expectedMessage]), $output);
     }
 
+    #[Test]
+    public function testDisplayProgress(): void
+    {
+        $output = $this->getBuffer(
+            fn () => LoggerOutput::progress("This is an progress indicated in purple.")
+        );
+
+        $expectedType    = "[ \e[35m>>\e[39m ]";
+        $expectedMessage = "This is an progress indicated in purple.";
+
+        $this->assertTrue(str_contains($output, $expectedType));
+        $this->assertTrue(str_contains($output, $expectedMessage));
+        $this->assertSame(implode(' ', [$expectedType, $expectedMessage]), $output);
+    }
+
     /**
      * Put the output in a buffer.
      *

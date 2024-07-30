@@ -2,36 +2,15 @@
 
 <?php
 
-use Phalcon\Cop\Parser;
-use Tamdaz\Doc2Html\Config;
-use Tamdaz\Doc2Html\Reflectors;
+use Tamdaz\Doc2Html\Commands\CommandRegister;
 use Tamdaz\Doc2Html\LoggerOutput;
-use Tamdaz\Doc2Html\Exceptions\EmptyClassesException;
 
 require_once "vendor/autoload.php";
 
-$parser = new Parser();
-$args = $parser->parse();
-
-if ($parser->has("gen-config")) {
-    copy(
-        __DIR__ . '/generators/doc2html.config.php',
-        './doc2html.config.php'
-    );
-
-    LoggerOutput::success("Successfully generated \"doc2html.config.php\" file.\n");
-
-    exit(0);
-}
-
-if ($parser->has("dev-mode")) {
-    Config::$envMode = "dev";
-}
-
-$reflector = new Reflectors();
-
 try {
-    $reflector->run();
-} catch (EmptyClassesException|DOMException|Exception $e) {
-    LoggerOutput::error("[{$e->getCode()}]: {$e->getMessage()}\n");
+    CommandRegister::getInstance($argv)->run();
+} catch (ReflectionException $e) {
+    LoggerOutput::error("An error occurred when analyzing commands.\n");
+
+    echo $e;
 }

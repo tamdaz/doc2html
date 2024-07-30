@@ -20,7 +20,7 @@ composer require --dev tamdaz/doc2html
 
 To generate a configuration, execute:
 ```shell
-./vendor/bin/doc2html --gen-config
+./vendor/bin/doc2html gen-config
 ```
 
 ```php
@@ -75,7 +75,10 @@ composer dump-autoload
 For information, this library uses the classmap of Composer to allow you
 to choose those you do not want to generate documentation.
 
-After that, you can generate it by executing `./vendor/bin/doc2html`.
+After that, you can generate it by executing:
+```shell
+./vendor/bin/doc2html generate-doc
+```
 
 > [!TIP]
 > You can create an alias for this command and save it in `~/.bashrc` file.
