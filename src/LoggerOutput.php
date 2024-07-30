@@ -61,6 +61,6 @@ class LoggerOutput
      */
     public static function progress(string $value): void
     {
-        echo "[ " . LogType::INFO_COLOR->value . ">>" . LogType::DEFAULT_COLOR->value . " ] $value";
+        echo "[ " . LogType::PROGRESS_COLOR->value . ">>" . LogType::DEFAULT_COLOR->value . " ] $value";
     }
 }
