@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
         $this->assertNotNull($namespacesToExclude);
 
         $this->assertSame(
-            ["Namespace\\Exclude"], $namespacesToExclude
+            ["Examples\\Exclusions"], $namespacesToExclude
         );
     }
 
@@ -62,7 +62,7 @@ class ConfigTest extends TestCase
         $this->assertNotNull($namespacesToInclude);
 
         $this->assertSame(
-            ["Namespace\\Exclude\\Include"], $namespacesToInclude
+            ["Examples\\Exclusions\\Inclusions"], $namespacesToInclude
         );
     }
 
@@ -75,7 +75,7 @@ class ConfigTest extends TestCase
         $this->assertNotNull($classesToExclude);
 
         $this->assertSame(
-            ["Namespace\\Exclude\\Include\\PersonalClass"], $classesToExclude
+            ["Examples\\Exclusions\\Inclusions\\PersonalExample"], $classesToExclude
         );
     }
 
@@ -88,7 +88,7 @@ class ConfigTest extends TestCase
         $this->assertNotNull($classesToInclude);
 
         $this->assertSame(
-            ["Namespace\\Exclude\\Include\\NonPersonalClass"], $classesToInclude
+            ["Examples\\Exclusions\\PhoneExample"], $classesToInclude
         );
     }
 }
