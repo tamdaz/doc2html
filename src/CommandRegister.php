@@ -1,12 +1,12 @@
 <?php
 
-namespace Tamdaz\Doc2Html\Commands;
+namespace Tamdaz\Doc2Html;
 
+use Exception;
 use ReflectionClass;
 use ReflectionException;
 use Tamdaz\Doc2Html\Attributes\Command;
-use Tamdaz\Doc2Html\Classmap;
-use Tamdaz\Doc2Html\LoggerOutput;
+use Tamdaz\Doc2Html\Commands\AbstractCommand;
 
 final class CommandRegister
 {
@@ -51,6 +51,20 @@ final class CommandRegister
     }
 
     /**
+     * Delete instance of this class
+     * @return bool Returns true if instance was deleted, false if not.
+     */
+    public static function deleteInstance(): bool
+    {
+        if (self::$_instance !== null) {
+            self::$_instance = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @return void
      * @throws ReflectionException
      */
@@ -72,13 +86,25 @@ final class CommandRegister
                     LoggerOutput::info("{$attribute->getName()} $spaces --> {$attribute->getDescription()}\n");
                 }
             }
+        } else {
+            $class = $this->findCorrespondingCommand();
 
-            exit(0);
+            $commandStatus = (new $class($this->getArguments(), $this->getOptions()))
+                ->execute()
+            ;
+
+            exit($commandStatus->value);
         }
+    }
 
-        /**
-         * @var AbstractCommand $class
-         */
+    /**
+     * @return string|AbstractCommand
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    private function findCorrespondingCommand(): string|AbstractCommand
+    {
+        /** @var AbstractCommand $class */
         foreach ($this->getFilteredClassmapByCommandClasses() as $class) {
             $reflection = new ReflectionClass($class);
 
@@ -88,17 +114,12 @@ final class CommandRegister
                 $attribute = $reflection->getAttributes(Command::class)[0]->newInstance();
 
                 if (in_array($attribute->getName(), $this->getArguments())) {
-                    $commandStatus = (new $class($this->getArguments(), $this->getOptions()))
-                        ->execute()
-                    ;
-
-                    exit($commandStatus->value);
+                    return $class;
                 }
             }
         }
 
-        LoggerOutput::error("No command found. Use the --help option to display all commands.\n");
-        exit(1);
+        throw new Exception("No command found. Use the --help option to display all commands.");
     }
 
     /**
@@ -146,16 +167,19 @@ final class CommandRegister
      */
     private function generateArgumentsAndOptions(array $argumentsAndOptions): void
     {
-        // Delete the first argument from array: it's the program name.
-        unset($argumentsAndOptions[0]);
+        if (Config::$envMode !== "test") {
+            // Delete the first argument from array: it's the program name.
+            // If we are in the test environment, so it's not necessary to delete it.
+            unset($argumentsAndOptions[0]);
+        }
 
         $this->arguments = array_filter($argumentsAndOptions, function (string $argument) {
-            return !str_starts_with($argument, "--") || !str_starts_with($argument, "-");
-        });
+            return !str_starts_with($argument, "--") && !($argument[0] === "-" && $argument[1] !== "-");
+        }, ARRAY_FILTER_USE_BOTH);
 
         $this->options = array_filter($argumentsAndOptions, function (string $option) {
-            return str_starts_with($option, "--") || str_starts_with($option, "-");
-        });
+            return str_starts_with($option, "--") || ($option[0] === "-" && $option[1] !== "-");
+        }, ARRAY_FILTER_USE_BOTH);
 
         $this->arguments = array_values($this->arguments);
         $this->options = array_values($this->options);
@@ -171,13 +195,13 @@ final class CommandRegister
                     $value = explode("=", $option)[1];
 
                     foreach ($shortOptions as $shortOption)
-                        $newOptions[$shortOption] = $value ??= true;
+                        $newOptions["-" . $shortOption] = $value ??= true;
 
                     continue;
                 }
 
                 foreach ($shortOptions as $shortOption) {
-                    $newOptions[$shortOption] = $value ?? true;
+                    $newOptions["-" . $shortOption] = $value ?? true;
                 }
             }
 
