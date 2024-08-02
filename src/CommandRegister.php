@@ -7,6 +7,7 @@ use ReflectionClass;
 use ReflectionException;
 use Tamdaz\Doc2Html\Attributes\Command;
 use Tamdaz\Doc2Html\Commands\AbstractCommand;
+use Tamdaz\Doc2Html\Exceptions\CommandNotFoundException;
 
 final class CommandRegister
 {
@@ -67,6 +68,7 @@ final class CommandRegister
     /**
      * @return void
      * @throws ReflectionException
+     * @throws CommandNotFoundException
      */
     public function run(): void
     {
@@ -99,7 +101,7 @@ final class CommandRegister
 
     /**
      * @return string|AbstractCommand
-     * @throws Exception
+     * @throws CommandNotFoundException
      * @throws ReflectionException
      */
     private function findCorrespondingCommand(): string|AbstractCommand
@@ -119,7 +121,7 @@ final class CommandRegister
             }
         }
 
-        throw new Exception("No command found. Use the --help option to display all commands.");
+        throw new CommandNotFoundException();
     }
 
     /**

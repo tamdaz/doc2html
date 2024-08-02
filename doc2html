@@ -2,8 +2,9 @@
 
 <?php
 
-use Tamdaz\Doc2Html\Commands\CommandRegister;
 use Tamdaz\Doc2Html\LoggerOutput;
+use Tamdaz\Doc2Html\CommandRegister;
+use Tamdaz\Doc2Html\Exceptions\CommandNotFoundException;
 
 require_once "vendor/autoload.php";
 
@@ -13,4 +14,6 @@ try {
     LoggerOutput::error("An error occurred when analyzing commands.\n");
 
     echo $e;
+} catch (CommandNotFoundException $e) {
+    LoggerOutput::error("[{$e->getCode()}] => {$e->getMessage()}\n");
 }
